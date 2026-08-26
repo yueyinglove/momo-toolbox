@@ -1,0 +1,2803 @@
+
+<!-- 代码由此开始 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>momo 个人工具箱</title>
+    <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@100;300;400;700;900&family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&family=ZCOOL+KuaiHei&family=ZCOOL+KuaiLe&family=Zhi+Mang+Xing&family=Liu+Jian+Mao+Cao&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "PingFang SC", "Noto Sans SC", sans-serif; background: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 0; margin: 0; }
+        .app-container { width: 100%; max-width: 100%; background: transparent; padding: 10px; position: relative; }
+        .main-interface { width: 100%; background: #fcfaf5; border-radius: 30px; border: 7px dashed #9dbba0; padding: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 30px; transition: all 0.2s ease; position: relative; overflow: hidden; margin: 0 auto; height: auto; min-height: 1025px; }
+        .view-mode-selector { position: absolute; top: 60px; right: 20px; z-index: 999; background: rgba(255,255,255,0.9); padding: 4px 14px; border-radius: 20px; border: 1.5px solid #a4c2a0; backdrop-filter: blur(6px); font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .view-mode-selector select { border: none; background: transparent; outline: none; color: #2e4d2c; font-weight: bold; cursor: pointer; }
+        .mode-card .main-interface { flex-direction: column; align-items: center; margin: 0 auto; display: flex; }
+        .mode-card .preview-area { flex: 0 0 auto; margin: 0 auto; width: 100%; }
+        .preview-area { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .banner-container { position: relative; width: 100%; border-radius: 16px; background: #d3e4d0; background-size: cover; background-position: center; margin-bottom: 0; overflow: visible; flex-shrink: 0; }
+        .absolute-avatar { position: absolute; border-radius: 50%; border: 3px solid #fff; background: #eee; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; z-index: 10; transition: 0.1s; }
+        .absolute-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .absolute-avatar-frame { position: absolute; pointer-events: none; z-index: 11; background-size: contain; background-position: center; background-repeat: no-repeat; transition: 0.1s; }
+        .absolute-name-wrapper { position: absolute; z-index: 10; transition: 0.1s; }
+        .name-bg-box { position: absolute; top: 0; left: 0; z-index: -1; background: transparent; border-radius: 8px; background-size: cover; background-position: center; transition: 0.1s; }
+        .absolute-name { font-weight: 700; line-height: 1.4; transition: 0.1s; }
+        .absolute-record { position: absolute; cursor: pointer; z-index: 20; transition: 0.1s; }
+        .record-disc { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #333, #111); box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; position: relative; }
+        .record-disc.playing { animation: spin 3s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .record-label { border-radius: 50%; background: #ffddaa; border: 2px solid #fff; background-size: cover; background-position: center; }
+        .tts-wrapper { position: absolute; z-index: 15; transition: 0.1s; }
+        .tts-bg-box { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; border: 2px dashed #D9E8D7; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); z-index: 1; pointer-events: none; }
+        .tts-text-box { position: relative; z-index: 2; padding: 10px 14px; line-height: 1.6; cursor: pointer; display: flex; flex-direction: column; justify-content: center; }
+        .app-section { flex: 1; display: flex; flex-direction: column; padding: 0 15px; justify-content: flex-start; }
+        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+        .app-block { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .app-icon { border-radius: 18px; background: #b8d4b0; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: bold; cursor: pointer; background-size: cover; background-position: center; transition: transform 0.1s; width: 70px; height: 70px; }
+        .app-icon:active { transform: scale(0.92); }
+        .app-name { color: #4A6F48; font-weight: 600; text-align: center; font-size: 12px; }
+        .footer { padding-top: 12px; flex-shrink: 0; }
+        .footer-dashed-box { border: 2px dashed #E4F0E2; border-radius: 16px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; }
+        .footer-content { font-family: 'Noto Sans SC', sans-serif; font-size: 4px; color: #a0b89e; font-weight: bold; line-height: 1.8; }
+        .content-panel { display: none; width: 100%; height: 100%; min-height: 800px; background: #fcfaf5; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .content-panel.active { display: block; }
+        .panel-header { display: flex; align-items: center; gap: 10px; border-bottom: 2px dashed #e4efe2; padding-bottom: 12px; margin-bottom: 15px; position: sticky; top: 0; background: #fcfaf5; z-index: 10; }
+        .panel-title { flex: 1; font-weight: bold; color: #365e34; font-size: 18px; }
+        .btn-back { background: #e4efe2; border: none; border-radius: 20px; padding: 6px 18px; color: #4a6f48; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-back:active { background: #d9e8d7; }
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
+        .filter-input { flex: 1; padding: 8px 12px; border: 2px solid #d9e8d7; border-radius: 12px; font-size: 14px; outline: none; background: #fff; }
+        .filter-input:focus { border-color: #9dbba0; }
+        .filter-btn { background: #4a6f48; color: #fff; border: none; border-radius: 12px; padding: 8px 15px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .filter-btn:active { background: #365e34; }
+        .multi-filter-area { display: none; background: #fff; border: 2px solid #d9e8d7; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .multi-filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; align-items: center; }
+        .multi-filter-row select, .multi-filter-row input { padding: 5px 8px; border: 1px solid #d9e8d7; border-radius: 6px; font-size: 13px; }
+        .data-item { background: #fff; border-radius: 14px; padding: 12px; border: 1px solid #e4efe2; margin-bottom: 10px; cursor: pointer; transition: 0.1s; position: relative; }
+        .data-item:active { background: #fcfaf5; }
+        .tag { background: #e4efe2; color: #4a6f48; padding: 2px 10px; border-radius: 12px; font-size: 11px; display: inline-block; margin-right: 4px; }
+        .detail-modal { display: none; background: #fff; border-radius: 20px; padding: 20px; border: 2px solid #9dbba0; margin-top: 15px; position: relative; }
+        .detail-modal.active { display: block; }
+        .detail-close { position: absolute; top: 10px; right: 15px; font-size: 20px; color: #4a6f48; cursor: pointer; }
+        .detail-label { font-weight: 600; color: #4a6f48; margin-top: 10px; display: block; }
+        .btn-copy { background: #d9e8d7; border: none; border-radius: 12px; padding: 4px 12px; color: #4a6f48; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        .btn-visit { display: inline-block; background: #4a6f48; color: #fff; border-radius: 20px; padding: 6px 16px; text-decoration: none; font-size: 13px; margin-top: 8px; white-space: nowrap; }
+        .btn-copy-group { background: #d9e8d7; border: none; border-radius: 12px; padding: 4px 12px; color: #4a6f48; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        .btn-copy-group:active { background: #c0d7be; }
+        .expand-btn { color: #4a6f48; font-size: 12px; cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; margin-left: 6px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: 600; color: #4a6f48; font-size: 14px; margin-bottom: 4px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 2px solid #d9e8d7; border-radius: 12px; font-size: 14px; background: #fff; outline: none; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #9dbba0; }
+        .btn-submit { background: #4a6f48; color: #fff; border: none; border-radius: 20px; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .checkbox-group { display: none; flex-wrap: wrap; gap: 8px; background: #fff; border: 2px solid #d9e8d7; border-radius: 12px; padding: 10px; max-height: 150px; overflow-y: auto; }
+        .checkbox-group.show { display: flex; }
+        .forum-post { background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 1px solid #e4efe2; }
+        .forum-post .meta { display: flex; justify-content: space-between; font-size: 12px; color: #7a9678; margin-bottom: 4px; }
+        .forum-input { width: 100%; padding: 8px; border: 1px solid #d9e8d7; border-radius: 8px; margin-bottom: 6px; }
+        .forum-name-row { display: flex; gap: 8px; margin-bottom: 6px; }
+        .forum-name-row input, .forum-name-row select { flex: 1; padding: 8px; border: 1px solid #d9e8d7; border-radius: 8px; font-size: 13px; }
+        .activity-post { background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 1px solid #e4efe2; }
+        .activity-post .title { font-weight: bold; color: #4a6f48; font-size: 15px; }
+        .activity-link-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+        .activity-link-row .url-text { color: #7a9678; font-size: 13px; word-break: break-all; flex: 1; }
+        .activity-post .content { font-size: 14px; color: #333; margin: 6px 0; white-space: pre-wrap; }
+        .key-item { background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 1px solid #e4efe2; display: flex; flex-direction: column; gap: 6px; }
+        .key-item .key-row { display: flex; justify-content: space-between; align-items: center; }
+        .key-item .key-text { font-family: monospace; font-size: 13px; color: #333; word-break: break-all; flex: 1; margin-right: 10px; }
+        .key-item .key-meta { font-size: 12px; color: #7a9678; }
+        .key-comment-item { font-size: 12px; color: #555; padding: 3px 0; border-bottom: 1px solid #f4f4f4; }
+        .url-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; flex-wrap: wrap; }
+        .url-text { color: #7a9678; font-size: 12px; word-break: break-all; flex: 1; }
+        .add-model-row { display: flex; gap: 6px; margin-top: 6px; }
+        .add-model-row input { flex: 1; padding: 6px 10px; border: 1px solid #d9e8d7; border-radius: 8px; font-size: 13px; }
+        .add-model-row button { background: #4a6f48; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        .searchable-select { position: relative; }
+        .searchable-select input { width: 100%; padding: 8px; border: 1px solid #d9e8d7; border-radius: 8px; }
+        .searchable-select .options { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d9e8d7; border-radius: 8px; max-height: 150px; overflow-y: auto; z-index: 20; }
+        .searchable-select .options div { padding: 6px 10px; cursor: pointer; font-size: 13px; }
+        .searchable-select .options div:hover { background: #f4f9f2; }
+        .star-btn { background: none; border: none; font-size: 18px; cursor: pointer; position: absolute; top: 8px; right: 8px; color: #ccc; }
+        .star-btn.active { color: #f5a623; }
+        .edit-btn { background: #e4efe2; border: none; border-radius: 12px; padding: 4px 10px; color: #4a6f48; font-size: 11px; cursor: pointer; margin-left: 6px; }
+        .detail-nav { display: flex; justify-content: space-between; margin-top: 10px; }
+        .detail-nav button { background: #e4efe2; border: none; border-radius: 12px; padding: 4px 12px; color: #4a6f48; font-size: 12px; cursor: pointer; }
+        .maintenance-item { background: #fff; border-radius: 14px; padding: 12px; border: 1px solid #e4efe2; margin-bottom: 10px; cursor: pointer; }
+        .progress-bar { background: #e4efe2; border-radius: 8px; height: 6px; margin: 4px 0; }
+        .progress-fill { background: #4a6f48; height: 100%; border-radius: 8px; }
+        .pagination { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 15px; flex-wrap: wrap; }
+        .pagination button { background: #e4efe2; border: none; border-radius: 8px; padding: 6px 12px; color: #4a6f48; font-size: 13px; cursor: pointer; }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination .page-info { font-size: 13px; color: #7a9678; }
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast { background: #365e34; color: #fff; padding: 10px 24px; border-radius: 20px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards; pointer-events: auto; max-width: 400px; text-align: center; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+        .select-all-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; margin-bottom: 6px; font-size: 13px; color: #4a6f48; }
+        .select-all-row input { margin: 0; }
+    </style>
+</head>
+<body>
+<div class="app-container mode-card" id="appContainer">
+    <div class="main-interface" id="mainInterface">
+        <div class="view-mode-selector">
+            <label>显示模式: <select id="viewModeSelect" onchange="changeViewMode()"><option value="mode-card" selected>手机居中卡片</option><option value="mode-pc">电脑模式同宽</option></select></label>
+        </div>
+        <div class="toast-container" id="toastContainer"></div>
+
+        <div class="preview-area" id="previewArea">
+            <div class="banner-container" id="bannerContainer" style="background-image: url('https://i.ibb.co/GzBfY1j/1784753404572.jpg'); background-size: cover; background-position: 0px -64px;">
+                <div class="absolute-avatar-frame" id="avatarFrameEl" style="width: 161px; height: 161px; opacity: 1; transform: translate(367px, 169px); background-image: none;"></div>
+                <div class="absolute-avatar" id="avatarEl" onclick="document.getElementById('avatarUpload').click()" style="width: 106px; height: 106px; transform: translate(392px, 210px);">
+                    <img id="avatarImg" src="https://i.ibb.co/hF5NDY5L/Camera-XHS-1784732477986.jpg" alt="头像">
+                    <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="handleUpload(this, 'avatarImg')">
+                </div>
+                <div class="absolute-name-wrapper" id="nameWrapperEl">
+                    <div class="name-bg-box" id="nameBgBoxEl" style="width: 191px; height: 40px; background-color: #ffffff; opacity: 0; transform: translate(359px, 328px);"></div>
+                    <div class="absolute-name" id="nameEl" style="font-family: 'Noto Sans SC', sans-serif; font-size: 20px; color: #4a6f48; font-weight: normal; transform: translate(395px, 328px);">momo之家</div>
+                </div>
+                <div class="absolute-record" id="recordEl" onclick="toggleTTS()" style="width: 157px; height: 157px; transform: translate(21px, 15px);">
+                    <div class="record-disc" id="recordDisc"><div class="record-label" id="recordCenter" style="width: 66%; height: 66%; background-image: url('https://i.ibb.co/hF5NDY5L/Camera-XHS-1784732477986.jpg'); background-size: cover;" onclick="event.stopPropagation(); document.getElementById('recordCenterUpload').click()"></div></div>
+                    <input type="file" id="recordCenterUpload" accept="image/*" style="display:none" onchange="handleUpload(this, 'recordCenter')">
+                </div>
+                <div class="tts-wrapper" id="ttsWrapperEl">
+                    <div class="tts-bg-box" id="ttsBgBox" style="width: 307px; height: 52px; background-color: #ffffff; opacity: 0.92; transform: translate(7px, 184px); border-radius: 16px; border: 2px dashed #D9E8D7;"></div>
+                    <div class="tts-text-box" id="ttsBoxEl" onclick="toggleTTS()" style="font-family: 'Zhi Mang Xing', cursive; font-size: 27px; color: #4a6f48; font-weight: bold; transform: translate(7px, 184px);"><div id="ttsContentDisplay">与君初相识，犹如故人归。</div></div>
+                </div>
+            </div>
+            <div class="app-section" id="appSection" style="margin-top: 100px; min-height: 100px; margin-bottom: -50px;">
+                <div class="app-grid" id="appGridContainer" style="transform: scale(1); transform-origin: top center;">
+                    <div class="app-block" onclick="openTool('panelTable')"><div class="app-icon" style="background-image: url('https://i.ibb.co/07XZNy8/1784752761049.jpg');"></div><div class="app-name">查找站子</div></div>
+                    <div class="app-block" onclick="openTool('panelAdd')"><div class="app-icon" style="background-image: url('https://i.ibb.co/Mxj97v2g/1784752730840.jpg');"></div><div class="app-name">新建录入</div></div>
+                    <div class="app-block" onclick="openTool('panelForum')"><div class="app-icon" style="background-image: url('https://i.ibb.co/JRV6cxY6/1784752696697.jpg');"></div><div class="app-name">反馈论坛</div></div>
+                    <div class="app-block" onclick="openTool('panelModify')"><div class="app-icon" style="background-image: url('https://i.ibb.co/Qjr2bckG/1784752584940.jpg');"></div><div class="app-name">修改</div></div>
+                    <div class="app-block" onclick="openTool('panelKey')"><div class="app-icon" style="background-image: url('https://i.ibb.co/YTWFmH89/1784752612405.jpg');"></div><div class="app-name">公共密钥</div></div>
+                    <div class="app-block" onclick="openTool('panelDelete')"><div class="app-icon" style="background-image: url('https://i.ibb.co/nqgj8zKr/1784752658872.jpg');"></div><div class="app-name">删除</div></div>
+                    <div class="app-block" onclick="openTool('panelActivity')"><div class="app-icon" style="background-image: url('https://i.ibb.co/VptVVXT5/1784752557565.jpg');"></div><div class="app-name">限时活动</div></div>
+                    <div class="app-block" onclick="openTool('panelDoc')"><div class="app-icon" style="background-image: url('https://i.ibb.co/Pz6K5k41/1784752520124.jpg');"></div><div class="app-name">参考文档</div></div>
+                    <div class="app-block" onclick="openTool('panelMy')"><div class="app-icon" style="background-image: url('https://i.ibb.co/1fj8cWd2/1784752497005.jpg');"></div><div class="app-name">我的</div></div>
+                </div>
+            </div>
+            <div class="footer" id="footerArea" style="margin-top: -50px;">
+                <div class="footer-dashed-box">
+                    <div class="footer-content" id="footerContent">本站点为「Momo之家·春山月」个人兴趣制作的永久免费公益工具，仅用于AI API、大模型平台信息汇总与技术交流，无任何充值、会员、付费授权、代充、售卖资料等商业收费服务，官方不会收取用户任何费用。<br>官方交流QQ群：一群 momo之家：1104281873 ｜ 二群 袋鼠之家：623201529 ｜ 三群 淘宝之家：1080802627，其余所有私域分享、倒卖链接、有偿售卖资源、第三方代理均为假冒人员私自行为，和本站官方无关。<br>用户若因非官方渠道私下交易造成被骗、财产损失、信息泄露等问题，本站概不承担任何责任。禁止私自破解、二次分发、商用倒卖本工具及汇总数据，违者将依法追责。<br>© 2026 momo之家.春山月</div>
+                    <button class="btn-copy-group" onclick="copyGroupNumber()">复制群号</button>
+                </div>
+            </div>
+        </div>
+
+<!-- ========== 查找站子面板 ========== -->
+<div id="panelTable" class="content-panel">
+    <div id="tableViewList">
+        <div class="panel-header"><span class="btn-back" onclick="closeTool('panelTable')">← 返回主页</span><span class="panel-title">查找站子</span></div>
+        <div class="filter-bar">
+            <!-- 此处追加 autocomplete="off"，位置放在 id 前后任意位置均可，这里放最后 -->
+            <input type="text" class="filter-input" id="searchInput" placeholder="输入名称、网址、备注..." oninput="renderTableData()" autocomplete="off" name="search_off">
+            <button class="filter-btn" onclick="toggleMultiFilter()">筛选</button>
+            <button class="filter-btn" style="background:#2e4d2c;" onclick="toggleCheckPanel()">一键核对网址</button>
+        </div>
+        <div class="multi-filter-area" id="multiFilterArea">
+            <div class="multi-filter-row"><label style="font-size:13px; color:#4a6f48; width:100%;">多条件组合筛选：</label></div>
+            <div class="multi-filter-row">
+                <label style="font-size:13px; color:#4a6f48;">厂商：</label>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; max-height:120px; overflow-y:auto; border:1px solid #d9e8d7; border-radius:8px; padding:6px;">
+                    <label class="select-all-row" style="width:100%;"><input type="checkbox" id="filterVendorSelectAll" onchange="toggleFilterVendorAll()">全选厂商</label>
+                    <div id="filterVendorCheckboxes"></div>
+                </div>
+            </div>
+            <div class="multi-filter-row">
+                <select id="filterSpeed"><option value="">速度</option><option value="快">快</option><option value="一般">一般</option><option value="慢">慢</option></select>
+                <select id="filterPublic"><option value="">公益</option><option value="是">是</option><option value="否">否</option></select>
+                <select id="filterCheckin"><option value="">签到</option><option value="是">是</option><option value="否">否</option></select>
+            </div>
+            <div class="multi-filter-row">
+                <select id="filterMagic"><option value="">特殊网络</option><option value="是">需要</option><option value="否">不需要</option></select>
+                <select id="filterStars"><option value="">星级</option><option value="5">5星</option><option value="4">4星</option><option value="3">3星</option><option value="2">2星</option><option value="1">1星</option></select>
+                <select id="filterStatus"><option value="">状态</option><option value="正常">正常</option><option value="失效">失效</option><option value="已下线">已下线</option></select>
+                <select id="filterOfficial"><option value="">类型</option><option value="官方直营">官方直营</option><option value="第三方中转">第三方中转</option></select>
+            </div>
+            <div class="multi-filter-row">
+                <select id="filterFee"><option value="">费率</option><option value="免费">免费</option><option value="低">低</option><option value="中">中</option><option value="高">高</option></select>
+                <select id="filterRegStatus"><option value="">注册状态</option><option value="开放注册中">开放注册中</option><option value="限时开放">限时开放</option><option value="暂不开放">暂不开放</option></select>
+                <input type="text" id="filterInviter" placeholder="邀请人" style="width:90px;">
+            </div>
+            <div class="multi-filter-row">
+                <select id="sortOrder"><option value="star" selected>排序：评分最高</option><option value="new">排序：最新</option><option value="popular">排序：评价人数最多</option></select>
+            </div>
+            <div class="multi-filter-row">
+                <button class="filter-btn" onclick="renderTableData()" style="background:#365e34;">应用筛选</button>
+            </div>
+        </div>
+
+        <!-- 一键核对区域 -->
+        <div id="checkPanel" style="display:none; background:#fff; border:2px solid #9dbba0; border-radius:12px; padding:15px; margin-bottom:15px;">
+            <div style="font-weight:bold; color:#365e34; margin-bottom:8px;">一键核对网址</div>
+            <div style="font-size:13px; color:#7a9678; margin-bottom:8px;">把你想核对的网址列表粘贴进来，每行一个或者用逗号分隔都可以~</div>
+            <textarea id="checkInput" rows="5" placeholder="https://xxx.com/register&#10;https://yyy.com/sign-up" style="width:100%; padding:10px; border:2px solid #d9e8d7; border-radius:12px; font-size:14px; resize:vertical;"></textarea>
+            <div style="margin-top:8px; display:flex; gap:10px;">
+                <button class="filter-btn" onclick="runCheck()">开始核对</button>
+                <button class="btn-copy" onclick="document.getElementById('checkInput').value=''; document.getElementById('checkResult').style.display='none';">清空</button>
+            </div>
+            <div id="checkResult" style="display:none; margin-top:15px;"></div>
+        </div>
+
+        <div class="select-all-row">
+            <input type="checkbox" id="tableSelectAll" onchange="toggleTableSelectAll()"> 全选当前页
+        </div>
+        <div id="dataListContainer"></div>
+        <div class="pagination" id="tablePagination"></div>
+    </div>
+    <div id="tableViewDetail" style="display:none;"></div>
+</div>
+
+        <!-- ========== 新建录入面板 ========== -->
+<div id="panelAdd" class="content-panel">
+    <div class="panel-header"><span class="btn-back" onclick="closeTool('panelAdd')">← 返回主页</span><span class="panel-title">新建录入</span></div>
+    <div class="form-group"><label>网站名称 *</label><input id="addName" placeholder="例如：硅基流动" autocomplete="off"></div>
+    <div class="form-group"><label>模型厂商（可多选）* <button class="expand-btn" onclick="toggleCheckboxGroup('addVendorCheckbox')">v</button></label>
+        <div class="checkbox-group" id="addVendorCheckbox"></div>
+        <div id="addCustomVendorArea" style="display:none; margin-top:6px;">
+            <input type="text" id="addCustomVendor" placeholder="输入自定义厂商名称" style="width:100%;">
+        </div>
+    </div>
+    <div class="form-group"><label>模型选择（选填，选完厂商后自动过滤） <button class="expand-btn" onclick="toggleCheckboxGroup('addModelCheckbox')">v</button></label>
+        <div class="checkbox-group" id="addModelCheckbox"></div>
+        <div id="addCustomModelArea" style="display:none;" class="add-model-row">
+            <input type="text" id="addModelCustom" placeholder="输入自定义模型名称">
+            <button onclick="addCustomModel()">添加</button>
+        </div>
+    </div>
+    <div class="form-group"><label>网址 *</label><input id="addWebUrl" placeholder="https://xxx.com" autocomplete="off"></div>
+    <div class="form-group"><label>API地址（选填，留空则自动用网址）</label><input id="addUrl" placeholder="https://api.xxx.com/v1" autocomplete="off"></div>
+    <div class="form-group"><label>调用速度（选填）</label><select id="addSpeed"><option value=""></option><option value="快">快</option><option value="一般">一般</option><option value="慢">慢</option></select></div>
+    <div class="form-group"><label>是否公益（选填）</label><select id="addPublic"><option value=""></option><option value="是">是</option><option value="否">否</option></select></div>
+    <div class="form-group"><label>可签到（选填）</label><select id="addCheckin"><option value=""></option><option value="是">是</option><option value="否">否</option></select></div>
+    <div class="form-group"><label>是否需要特殊网络？（选填）</label><select id="addMagic"><option value=""></option><option value="是">是</option><option value="否">否</option></select></div>
+    <div class="form-group"><label>自测推荐指数（选填）</label><select id="addStars"><option value="0">0星</option><option value="5">5星</option><option value="4">4星</option><option value="3">3星</option><option value="2">2星</option><option value="1">1星</option></select></div>
+    <div class="form-group"><label>状态（选填）</label><select id="addStatus"><option value=""></option><option value="正常">正常</option><option value="失效">失效</option><option value="已下线">已下线</option></select></div>
+    <div class="form-group"><label>是否官方直营（选填）</label><select id="addOfficial"><option value=""></option><option value="官方直营">官方直营</option><option value="第三方中转">第三方中转</option></select></div>
+    <div class="form-group"><label>费率（选填）</label><select id="addFee"><option value=""></option><option value="免费">免费</option><option value="低">低</option><option value="中">中</option><option value="高">高</option></select></div>
+    <div class="form-group"><label>注册状态（选填）</label><select id="addRegMain" onchange="toggleRegSubOptions()"><option value=""></option><option value="开放注册中">开放注册中</option><option value="限时开放">限时开放</option><option value="暂不开放">暂不开放</option></select></div>
+    <div class="form-group" id="regSubOptions" style="display:none;">
+        <label>注册方式（可多选）</label>
+        <div class="checkbox-group" id="addRegStatusCheckbox" style="display:flex;"></div>
+    </div>
+    <div class="form-group"><label>试吃福利（选填）</label><select id="addTrial" onchange="toggleTrialCustom()"><option value=""></option><option value="无">无</option><option value="送少量">送少量</option><option value="送中等">送中等</option><option value="送大量">送大量</option><option value="自定义">自定义</option></select></div>
+    <div class="form-group" id="trialCustomGroup" style="display:none;"><input id="addTrialCustom" placeholder="请描述试吃福利"></div>
+    <div class="form-group"><label>站方联系方式（选填）</label><input id="addContact" placeholder="官方QQ群号、官方邮箱等"></div>
+    <div class="form-group"><label>邀请人（选填）</label><input id="addInviter" placeholder="你的名字/昵称" autocomplete="off"></div>
+    <div class="form-group"><label>新增人评价 / 注意事项（选填）</label><textarea id="addNote" rows="3" placeholder="写写你对这个站子的体验、注意事项、后续可能失效的提醒等..."></textarea></div>
+    <button class="btn-submit" onclick="submitNewData()">提交录入</button>
+</div>
+        <!-- ========== 反馈论坛面板（保持不变） ========== -->
+        <div id="panelForum" class="content-panel">
+            <div class="panel-header"><span class="btn-back" onclick="closeTool('panelForum')">← 返回主页</span><span class="panel-title" id="forumBreadcrumb">反馈论坛</span></div>
+            <div id="forumListContainer"></div>
+            <div id="forumPostDetail" style="display:none;"></div>
+        </div>
+
+        <!-- ========== 删除面板 ========== -->
+        <div id="panelDelete" class="content-panel">
+            <div class="panel-header"><span class="btn-back" onclick="closeTool('panelDelete')">← 返回主页</span><span class="panel-title">删除数据</span></div>
+            <div class="form-group"><label>管理员密码</label><input type="password" id="deleteAdminPassword" placeholder="输入管理员密码"></div>
+            <button class="btn-submit" onclick="verifyAdminForDelete()">验证</button>
+            <div id="deleteContent" style="display:none; margin-top:15px;">
+                <div class="filter-bar"><input type="text" class="filter-input" id="deleteSearchInput" placeholder="搜索要删除的站子..." oninput="renderDeleteList()"></div>
+                <div class="select-all-row">
+                    <input type="checkbox" id="deleteSelectAll" onchange="toggleDeleteSelectAll()"> 全选当前页
+                </div>
+                <div id="deleteListContainer"></div>
+                <div class="pagination" id="deletePagination"></div>
+                <hr style="margin:20px 0; border:1px dashed #e4efe2;">
+                <div class="form-group"><label>一键删除此人所有修改记录</label><input id="deleteUserName" placeholder="输入用户名或昵称"></div>
+                <button class="btn-submit" style="background:#c0392b;" onclick="deleteUserModifications()">删除此人所有修改</button>
+                <div class="form-group" style="margin-top:15px;"><label>添加管理员</label><input id="newAdminName" placeholder="输入要添加的管理员昵称"></div>
+                <button class="btn-submit" onclick="addAdmin()">添加管理员</button>
+                <div class="form-group" style="margin-top:15px;"><label>移除管理员</label><input id="removeAdminName" placeholder="输入要移除的管理员昵称"></div>
+                <button class="btn-submit" style="background:#c0392b;" onclick="removeAdmin()">移除管理员</button>
+                <hr style="margin:20px 0; border:1px dashed #e4efe2;">
+                <div class="form-group"><label>拉黑用户（将禁止其修改/录入）</label><input id="blockUserName" placeholder="输入要拉黑的昵称"></div>
+                <button class="btn-submit" style="background:#e67e22;" onclick="blockUser()">拉黑该用户</button>
+                <div class="form-group" style="margin-top:10px;"><label>解除拉黑</label><input id="unblockUserName" placeholder="输入要解除拉黑的昵称"></div>
+                <button class="btn-submit" onclick="unblockUser()">解除拉黑</button>
+                <hr style="margin:20px 0; border:1px dashed #e4efe2;">
+                <div class="form-group"><label>批量导入站子（JSON格式）</label><textarea id="batchImportJson" rows="6" placeholder='[{"name":"示例站","url":"https://...","webUrl":"https://...","speed":"快","public":"是",...}]'></textarea></div>
+                <button class="btn-submit" onclick="batchImportData()">批量导入</button>
+            </div>
+        </div>
+
+        <!-- ========== 公共密钥面板（保持不变） ========== -->
+        <div id="panelKey" class="content-panel">
+            <div class="panel-header"><span class="btn-back" onclick="closeTool('panelKey')">← 返回主页</span><span class="panel-title">公共密钥分享区</span></div>
+            <div id="keyListContainer"></div>
+            <div id="keyPostDetail" style="display:none;"></div>
+        </div>
+
+<!-- ========== 修改面板（重构版：三标签） ========== -->
+<div id="panelModify" class="content-panel">
+    <div class="panel-header" style="flex-wrap:wrap; gap:5px;">
+        <span class="btn-back" onclick="closeTool('panelModify')">← 返回主页</span>
+        <span class="panel-title">修改数据</span>
+        <div style="display:flex; gap:6px; margin-left:10px;">
+            <button class="btn-copy" id="tabModifyList" onclick="switchModifyTab('list')" style="background:#4a6f48; color:#fff;">修改列表</button>
+            <button class="btn-copy" id="tabMaintenance" onclick="switchModifyTab('maintenance')">信息维护</button>
+            <button class="btn-copy" id="tabFailurePool" onclick="switchModifyTab('failure')">失效站子池</button>
+        </div>
+    </div>
+
+    <!-- 修改列表视图 -->
+    <div id="modifyListView">
+        <div class="filter-bar">
+            <input type="text" class="filter-input" id="modifySearchInput" placeholder="搜索要修改的站子..." oninput="renderModifyList()">
+            <button class="filter-btn" onclick="toggleModifyBatch()">批量修改</button>
+        </div>
+        <div id="modifyBatchArea" style="display:none; margin-bottom:15px;">
+            <select id="batchField" style="padding:5px; border:1px solid #d9e8d7; border-radius:6px;" onchange="updateBatchValueOptions()">
+                <option value="status">状态</option><option value="public">公益</option><option value="checkin">签到</option><option value="magic">特殊网络</option><option value="speed">速度</option><option value="stars">星级</option><option value="official">类型</option><option value="fee">费率</option><option value="reg_status">注册状态</option>
+            </select>
+            <select id="batchValue" style="padding:5px; border:1px solid #d9e8d7; border-radius:6px; margin-left:6px;"></select>
+            <button class="filter-btn" onclick="applyBatchModify()">应用批量修改</button>
+        </div>
+        <div class="select-all-row">
+            <input type="checkbox" id="modifySelectAll" onchange="toggleModifySelectAll()"> 全选当前页
+        </div>
+        <div id="modifyListContainer"></div>
+        <div class="pagination" id="modifyPagination"></div>
+    </div>
+
+    <!-- 修改编辑视图 -->
+    <div id="modifyEditView" style="display:none;"></div>
+
+    <!-- 信息维护视图 -->
+    <div id="maintenanceContainer" style="display:none;"></div>
+
+    <!-- 失效站子池视图 -->
+    <div id="failurePoolContainer" style="display:none;"></div>
+</div>
+        <!-- ========== 限时活动面板（保持不变） ========== -->
+        <div id="panelActivity" class="content-panel">
+            <div class="panel-header"><span class="btn-back" onclick="closeTool('panelActivity')">← 返回主页</span><span class="panel-title">限时活动</span></div>
+            <div id="activityListContainer"></div>
+            <div id="activityPostDetail" style="display:none;"></div>
+        </div>
+
+        <!-- ========== 参考文档面板 ========== -->
+<div id="panelDoc" class="content-panel">
+    <div class="panel-header"><span class="btn-back" onclick="closeTool('panelDoc')">← 返回主页</span><span class="panel-title">参考文档</span></div>
+    <div style="background:#fcfaf5; border:2px dashed #E4F0E2; border-radius:16px; padding:12px; margin-bottom:15px; text-align:left;">
+        <div style="font-size:13px; color:#4a6f48; font-weight:bold; cursor:pointer;" onclick="toggleDocCopyright()">版权与免责声明 v</div>
+        <div id="docCopyrightContent" style="display:none; font-size:4px; color:#a0b89e; line-height:1.8; margin-top:8px;">
+            本AI API中转站汇总检索工具、全网模型平台整理数据集、配套说明文档、网页应用程序本体，全部著作权、运营归属权归「Momo之家·春山月」所有。本项目为纯个人兴趣打造的免费公益站点，全程永久免费对外开放，不开展任何充值付费、会员售卖、接口代充、权限分销、资料售卖、有偿定制等商业收费业务，官方工作人员不会以任何名义向用户收取费用。<br>本项目唯一官方交流渠道：QQ群 1104281873，无官方微信群、Discord、企业微信、私人客服、第三方代理、外部付费站点等其他官方渠道。<br>所有非本官方QQ群流出的网页链接、工具安装包等内容，均为第三方个人私自搬运、篡改、倒卖、二次分发所得，与「Momo之家·春山月」运营团队无任何隶属、授权、合作关系。请全体用户提高警惕，切勿轻信网络上倒卖资源、有偿解锁功能、代充值第三方API、私下交易账号、付费购买内部资料等骗局；若因访问非官方链接、参与第三方私下交易、添加非官方人员导致遭遇网络诈骗、财产损失、个人信息泄露、账号封禁、设备中毒等一切不良后果及法律、经济纠纷，均由当事人自行承担全部责任，本站点及运营团队不承担任何连带赔偿、法律责任。<br>本站点仅用于公开网络信息收集整理、技术交流、个人学习娱乐使用，不对任何第三方AI模型厂商、API接口平台的服务稳定性、合规性、收费规则、数据安全、服务可用性作出任何承诺与担保；所有第三方平台版权、运营权责归原厂商持有。严禁任何单位或个人对本网页工具、汇总数据集进行二次打包、逆向破解、篡改源码、商用倒卖、付费分销、冒用名义开展盈利活动，一经查实，我方将保留追究侵权人员法律责任的权利。
+        </div>
+    </div>
+    <div style="background:#fcfaf5; border:2px dashed #E4F0E2; border-radius:16px; padding:12px; margin-bottom:15px; text-align:left;">
+        <div style="font-size:13px; color:#4a6f48; font-weight:bold; cursor:pointer;" onclick="document.getElementById('docGuideContent').style.display = document.getElementById('docGuideContent').style.display === 'none' ? 'block' : 'none';">使用指南 v</div>
+        <div id="docGuideContent" style="display:none; font-size:13px; color:#4a6f48; line-height:1.8; margin-top:8px;">
+            欢迎来到 Momo之家！这是一个大家一起搭建的 AI API 中转站信息汇总工具。你可以在这里查找站子、录入新站子、维护站子信息，还能通过纠错和录入获得成就称号。下面逐一介绍每个板块怎么用~<br><br>
+
+            查找站子<br>
+            这是你最常用的地方。你可以通过关键词搜索站子名称或网址，也可以用筛选器按厂商、速度、公益、星级等条件精确查找。每个站子卡片上会显示名称、模型、厂商、邀请人等信息，点击卡片可以查看完整详情，包括评分和评价。筛选栏旁边还有一个一键核对网址功能，把你手头的一堆网址粘贴进去，工具会自动帮你分辨哪些已经在库里、哪些还没收录。已收录的可以直接一键收藏，未收录的可以一键跳转到新建录入，再也不用一个一个手动查重啦。<br><br>
+
+            新建录入<br>
+            发现了一个还没被收录的站子？来这里填写它的信息吧。必填项只有三个：站子名称、API 地址、模型厂商。其他字段都是选填的，你可以慢慢补充。提交时如果完整度不足 50%，工具会提醒你后续可能会被其他人补全并替换链接。如果完整度达到 50% 以上，你会自动成为这个站子的维护人，享有 3 个月的保护期，期间别人不能修改你的邀请链接。而且录入后有 72 小时的缓冲期，只有你自己能补全信息，不用担心刚录入就被抢。每成功录入一个完整度 ≥50% 的站子，你的维护名额上限就会 +5，录入越多，你能维护的站子就越多~<br><br>
+
+            修改面板<br>
+            修改面板有三个标签页：<br>
+            修改列表：可以搜索并逐条修改站子信息，也支持批量修改。把站子标记为失效时，工具会提醒你注意次数，因为被纠错太多次会扣维护名额哦。<br>
+            信息维护：这里会列出所有完整度低于 50% 且已过 72 小时保护期的站子。你可以帮它们补全信息，补全后这个站子的链接就会替换成你自己的。同一个站子 30 天内只能被维护一次，防止频繁抢夺。<br>
+            失效站子池：所有被标记为失效的站子都会出现在这里。如果你发现某个站子其实还能用，可以点击我要纠错。纠错成功 3 次就能获得 1 个额外维护名额。反过来，如果你标记失效的站子被纠错超过 3 次，会失去 1 个名额（最低扣到 -10，扣到 -10 说明标记错了 60 次，基本确认是捣乱分子啦，可能会被封号哦）。<br><br>
+
+            我的面板<br>
+            这里是你的个人中心。登录后可以看到统计卡片（创建的站子数、维护的站子数、收藏数、成功纠错次数）、维护名额（当前已用和总额度）、签名和评论。<br>
+            成就系统里可以查看和切换称号。录入站子越多称号越高级，从初级录入员一路升到模型猎手。维护名额达到 20 个还能自选一个喜欢的模型厂商作为称号（比如 DeepSeek、Claude、Gemini 等），达到 52 个更可以自定义专属称号。如果你的站子被别人通过失效纠错更换了链接，面板里会弹出 48 小时通知，你可以一键换回自己的链接。<br><br>
+
+            维护名额规则<br>
+            每个人默认有 10 个基础维护名额。每录入一个完整度 ≥50% 的站子，名额就 +5。成功纠错 3 个失效站子也能 +1。相反，标记失效被纠错 3 次则会 -1。简单来说，录得越多、纠错越多，你能维护的站子就越多~<br><br>
+
+            其他板块<br>
+            反馈论坛：交流使用体验、求助问答、灌水聊天的地方。<br>
+            公共密钥：大家分享 API 密钥的区域。<br>
+            限时活动：关注各站子的限时福利活动。<br>
+            删除：管理员专用，普通用户看不到。<br><br>
+
+            以上就是 Momo之家的主要功能啦。核心就三件事：找站子、录站子、维护站子。录入和纠错都有激励，乱标失效也有约束，大家一起维护一个公平、准确的站子数据库~ 快去试试吧，有什么问题随时在反馈论坛里喊我~
+        </div>
+    </div>
+    <div class="filter-bar"><input type="text" class="filter-input" id="docSearchInput" placeholder="搜索文档..." oninput="renderDocList()"></div>
+    <div id="docListContainer" style="margin-bottom:15px;"></div>
+    <div id="docPostDetail" style="display:none;"></div>
+</div>
+
+        <!-- ========== 我的面板（保持不变） ========== -->
+        <div id="panelMy" class="content-panel">
+            <div class="panel-header"><span class="btn-back" onclick="closeTool('panelMy')">← 返回主页</span><span class="panel-title">我的</span></div>
+            <div id="myContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== 全静态直连版数据客户端（直连 Supabase，服务器完全退出） ====================
+    const SUPABASE_URL = 'https://rcqpwfwcvnnnfsbybzza.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_2aUrk0WUALAohaAWGPvd1A_veccBfKO';
+    // 管理员密码的 sha256 hex（= sha256(明文)），部署时生成后填这里；明文不落前端
+    const ADMIN_PASSWORD_SHA = '307e844a49de0d77242a79cff713ea52c8bdea405c20b9bf31573dddfb3f1a7c';
+    // 管理员名单 / 黑名单（部署时按需调整；本地增删只对当前浏览器生效）
+    const LOCAL_ADMINS = ['momo'];
+    const LOCAL_BLOCKS = [];
+
+    function supaHeaders() {
+        return {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // 复刻后端哈希：sha256(salt + password) -> 'sha256$salt$hash'
+    async function sha256Hex(str) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function sha256Pw(password) {
+        const salt = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('');
+        const h = await sha256Hex(salt + password);
+        return 'sha256$' + salt + '$' + h;
+    }
+    async function verifyLocalPw(password, stored) {
+        if (!stored || !password) return false;
+        if (String(stored).startsWith('sha256$')) {
+            const parts = String(stored).split('$');
+            if (parts.length !== 3) return false;
+            const h = await sha256Hex(parts[1] + password);
+            return h === parts[2];
+        }
+        return String(stored) === String(password);
+    }
+    async function verifyAdminPw(pw) {
+        if (!ADMIN_PASSWORD_SHA) return false;
+        return (await sha256Hex(pw)) === ADMIN_PASSWORD_SHA;
+    }
+
+    const supa = { from(table) { return new QueryBuilder(table); } };
+
+    class QueryBuilder {
+    constructor(table) {
+        this.table = table;
+        this.url = SUPABASE_URL + '/rest/v1/' + table;
+        this.headers = supaHeaders();
+        this.params = new URLSearchParams();
+        this.body = null;
+        this.method = 'GET';
+    }
+    select(columns = '*') { this.params.set('select', columns); return this; }
+    insert(data) { this.method = 'POST'; this.body = JSON.stringify(data); this.headers['Prefer'] = 'return=representation'; return this; }
+    update(data) { this.method = 'PATCH'; this.body = JSON.stringify(data); this.headers['Prefer'] = 'return=representation'; return this; }
+    delete() { this.method = 'DELETE'; this.headers['Prefer'] = 'return=representation'; return this; }
+    eq(field, value) { this.params.append(field, `eq.${value}`); return this; }
+    neq(field, value) { this.params.append(field, `neq.${value}`); return this; }
+    gt(field, value) { this.params.append(field, `gt.${value}`); return this; }
+    gte(field, value) { this.params.append(field, `gte.${value}`); return this; }
+    lt(field, value) { this.params.append(field, `lt.${value}`); return this; }
+    lte(field, value) { this.params.append(field, `lte.${value}`); return this; }
+    like(field, pattern) { this.params.append(field, `like.${pattern}`); return this; }
+    ilike(field, pattern) { this.params.append(field, `ilike.${pattern}`); return this; }
+    in(field, values) { this.params.append(field, `in.(${values.join(',')})`); return this; }
+    or(filters) { this.params.append('or', `(${filters})`); return this; }
+    order(field, { ascending = true } = {}) { this.params.append('order', `${field}.${ascending ? 'asc' : 'desc'}`); return this; }
+    limit(n) { this.params.append('limit', n); return this; }
+    offset(n) { this.params.append('offset', n); return this; }
+    count() { this.headers['Prefer'] = 'count=exact'; return this; }
+    single() { this.isSingle = true; return this; }
+    async then(resolve, reject) {
+        try {
+            const url = `${this.url}?${this.params.toString()}`;
+            const res = await fetch(url, {
+                method: this.method,
+                headers: this.headers,
+                body: this.method !== 'GET' ? this.body : undefined
+            });
+            const json = await res.json().catch(() => ({}));
+            if (res.status >= 400) {
+                resolve({ data: null, count: null, error: { message: json.message || json.error || ('请求失败(' + res.status + ')') } });
+                return;
+            }
+            let data = (this.method === 'DELETE') ? null : json;
+            if (this.method === 'GET' && !Array.isArray(json)) data = null;
+            if (this.isSingle && Array.isArray(data)) data = data[0] || null;
+            let totalCount = null;
+            const cr = res.headers.get('Content-Range');
+            if (cr && cr.indexOf('/') >= 0) totalCount = parseInt(cr.split('/')[1]);
+            if (totalCount === null || isNaN(totalCount)) totalCount = Array.isArray(data) ? data.length : null;
+            resolve({ data, count: totalCount, error: null });
+        } catch (error) { resolve({ data: null, count: null, error }); }
+    }
+}
+
+    // ==================== 模型厂商和模型映射表 ====================
+    const VENDOR_LIST = ['DeepSeek','GPT','Claude','Gemini','Grok','Mistral','Kimi','文心一言','通义千问','混元','星火','GLM','百川大模型','ABAB','MiMo','盘古','其他厂商'];
+
+    const MODEL_MAP = {
+        'DeepSeek': ['DeepSeek-V2','DeepSeek-V3','DeepSeek-V3.1','DeepSeek-V3.2','DeepSeek-V4-Pro','DeepSeek-V4-Flash','DeepSeek-R1'],
+        'GPT': ['GPT-3.5-Turbo','GPT-4','GPT-4-Turbo','GPT-4o','GPT-4o-mini','o1','o1-mini','o3'],
+        'Claude': ['Claude 2','Claude 2.1','Claude 2.5','Claude 3 Opus','Claude 3 Sonnet','Claude 3 Haiku','Claude 4 Opus','Claude 4 Sonnet','Claude Fable 5'],
+        'Gemini': ['Gemini 1.0 Pro','Gemini 1.0 Ultra','Gemini 1.5 Pro','Gemini 1.5 Flash','Gemini 2.0 Flash','Gemini 3.5 Flash-Lite','Gemini 3.6 Flash'],
+        'Grok': ['Grok 4.1','Grok 4.1 Thinking','Grok 4 Fast','Grok 4.5'],
+        'Mistral': ['Mistral 8x7B','Mistral Large','Mistral Large 2','Mistral Small'],
+        'Kimi': ['Kimi 2.0','Kimi 2.5','Kimi K3','Kimi Ultra'],
+        '文心一言': ['ERNIE 3.5 Turbo','ERNIE 4.0','ERNIE 4.5','ERNIE X1'],
+        '通义千问': ['Qwen 1.5','Qwen 2.5','Qwen 3.7 Plus','Qwen 3.8 Max'],
+        '混元': ['混元3.0','混元3.5 Turbo','混元4.0','混元4.0 Max'],
+        '星火': ['星火3.0','星火3.5','星火4.0','星火Ultra'],
+        'GLM': ['GLM-3','GLM-4','GLM-4V','GLM-5'],
+        '百川大模型': ['百川2.0','百川3.0','百川4.0','百川Ultra'],
+        'ABAB': ['ABAB 6B','ABAB 65B','ABAB Pro','ABAB Turbo'],
+        'MiMo': ['MiMo Base','MiMo Chat','MiMo Code','MiMo Ultra'],
+        '盘古': ['盘古4.0','盘古5.0','盘古Lite','盘古Vision']
+    };
+
+    // 所有厂商的模型并集（用于快速查找）
+    const ALL_PREDEFINED_MODELS = Object.values(MODEL_MAP).flat();
+
+    // 完整度计算字段（排除 name, url, vendors 三个必填项）
+    const COMPLETENESS_FIELDS = ['web_url','models','speed','public','checkin','magic','stars','status','official','fee','reg_status','trial','contact','inviter','note'];
+    const COMPLETENESS_TOTAL = COMPLETENESS_FIELDS.length + 3; // 含必填项共19个字段
+
+    const REG_SUB_OPTIONS = ['邮箱注册','微信注册','需特殊网络环境'];
+    // 管理员密码已迁至服务器，前端不再保留
+    const PAGE_SIZE = 20;
+    let currentDetailId = null;
+    let favorites = JSON.parse(localStorage.getItem('momo_favorites') || '[]');
+    let adminList = LOCAL_ADMINS.slice();
+    let blockList = LOCAL_BLOCKS.slice();
+    let customModels = []; // 用户自定义添加的模型
+    let tablePage = 0, tableTotal = 0;
+    let modifyPage = 0, modifyTotal = 0;
+    let deletePage = 0, deleteTotal = 0;
+    let selectedModifyIds = new Set();
+    let selectedDeleteIds = new Set();
+    let selectedTableIds = new Set();
+
+    // ==================== Toast 提示 ====================
+    function showToast(msg) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2600);
+    }
+
+    // ==================== 头像上传 ====================
+    function handleUpload(input, targetId) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const url = e.target.result;
+            if (targetId === 'avatarImg') document.getElementById('avatarImg').src = url;
+            else if (targetId === 'recordCenter') document.getElementById('recordCenter').style.backgroundImage = `url(${url})`;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ==================== TTS 语音 ====================
+    let ttsSynth = window.speechSynthesis;
+    let isPlaying = false;
+    function toggleTTS() {
+        if (isPlaying) { ttsSynth.cancel(); isPlaying = false; document.getElementById('recordDisc').classList.remove('playing'); return; }
+        const text = document.getElementById('ttsContentDisplay').textContent;
+        if (!text) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-CN';
+        utterance.onstart = () => { isPlaying = true; document.getElementById('recordDisc').classList.add('playing'); };
+        utterance.onend = () => { isPlaying = false; document.getElementById('recordDisc').classList.remove('playing'); };
+        utterance.onerror = () => { isPlaying = false; document.getElementById('recordDisc').classList.remove('playing'); };
+        ttsSynth.speak(utterance);
+    }
+
+    // ==================== 显示模式 ====================
+    function changeViewMode() {
+        const mode = document.getElementById('viewModeSelect').value;
+        const container = document.getElementById('appContainer');
+        const mainBox = document.getElementById('mainInterface');
+        const previewArea = document.getElementById('previewArea');
+        const banner = document.getElementById('bannerContainer');
+        const appSection = document.getElementById('appSection');
+        const footerArea = document.getElementById('footerArea');
+        const footerContent = document.getElementById('footerContent');
+        const appGrid = document.getElementById('appGridContainer');
+        const avatarEl = document.getElementById('avatarEl');
+        const avatarFrameEl = document.getElementById('avatarFrameEl');
+        const nameBgBoxEl = document.getElementById('nameBgBoxEl');
+        const nameEl = document.getElementById('nameEl');
+        const recordEl = document.getElementById('recordEl');
+        const recordCenter = document.getElementById('recordCenter');
+        const ttsBgBox = document.getElementById('ttsBgBox');
+        const ttsBoxEl = document.getElementById('ttsBoxEl');
+
+        container.className = 'app-container ' + mode;
+
+        if (mode === 'mode-card') {
+            mainBox.style.width = '616px'; mainBox.style.height = '1005px'; mainBox.style.flexDirection = 'column'; mainBox.style.gap = '15px'; mainBox.style.alignItems = 'center';
+            previewArea.style.width = '560px'; previewArea.style.height = '981px';
+            banner.style.width = '517px'; banner.style.marginTop = '39px'; banner.style.height = '279px'; banner.style.marginBottom = '15px'; banner.style.backgroundPosition = '0px -64px';
+            appSection.style.marginTop = '100px'; appSection.style.minHeight = '100px'; appSection.style.marginBottom = '-50px';
+            appGrid.style.transform = 'scale(1)'; appGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            document.querySelectorAll('.app-icon').forEach(el => { el.style.width = '70px'; el.style.height = '70px'; });
+            footerArea.style.marginTop = '-50px'; footerArea.style.transform = '';
+            footerContent.style.fontSize = '4px';
+            avatarEl.style.width = '106px'; avatarEl.style.height = '106px'; avatarEl.style.transform = 'translate(392px, 210px)';
+            avatarFrameEl.style.width = '161px'; avatarFrameEl.style.height = '161px'; avatarFrameEl.style.transform = 'translate(367px, 169px)';
+            nameBgBoxEl.style.width = '191px'; nameBgBoxEl.style.height = '40px'; nameBgBoxEl.style.transform = 'translate(359px, 328px)';
+            nameEl.style.fontSize = '20px'; nameEl.style.transform = 'translate(395px, 328px)';
+            recordEl.style.width = '157px'; recordEl.style.height = '157px'; recordEl.style.transform = 'translate(21px, 15px)';
+            recordCenter.style.width = '66%'; recordCenter.style.height = '66%';
+            ttsBgBox.style.width = '307px'; ttsBgBox.style.height = '52px'; ttsBgBox.style.transform = 'translate(7px, 184px)';
+            ttsBoxEl.style.fontSize = '27px'; ttsBoxEl.style.transform = 'translate(7px, 184px)';
+        } else {
+            mainBox.style.width = '1208px'; mainBox.style.height = '520px'; mainBox.style.flexDirection = 'row'; mainBox.style.gap = '30px'; mainBox.style.alignItems = 'stretch';
+            previewArea.style.width = '1169px'; previewArea.style.height = '476px';
+            banner.style.width = '1134px'; banner.style.marginTop = '0px'; banner.style.height = '200px'; banner.style.marginBottom = '15px'; banner.style.backgroundPosition = '0px -278px';
+            appSection.style.marginTop = '56px'; appSection.style.minHeight = '106px'; appSection.style.marginBottom = '-68px';
+            appGrid.style.transform = 'scale(0.95)'; appGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            document.querySelectorAll('.app-icon').forEach(el => { el.style.width = '60px'; el.style.height = '60px'; });
+            footerArea.style.marginTop = '-200px'; footerArea.style.transform = 'translateY(146px)';
+            footerContent.style.fontSize = '10px';
+            avatarEl.style.width = '197px'; avatarEl.style.height = '197px'; avatarEl.style.transform = 'translate(903px, 78px)';
+            avatarFrameEl.style.width = '161px'; avatarFrameEl.style.height = '161px'; avatarFrameEl.style.transform = 'translate(186px, 191px)';
+            nameBgBoxEl.style.width = '191px'; nameBgBoxEl.style.height = '40px'; nameBgBoxEl.style.transform = 'translate(671px, 205px)';
+            nameEl.style.fontSize = '27px'; nameEl.style.transform = 'translate(671px, 205px)';
+            recordEl.style.width = '213px'; recordEl.style.height = '213px'; recordEl.style.transform = 'translate(9px, 31px)';
+            recordCenter.style.width = '77%'; recordCenter.style.height = '77%';
+            ttsBgBox.style.width = '307px'; ttsBgBox.style.height = '52px'; ttsBgBox.style.transform = 'translate(0px, 246px)';
+            ttsBoxEl.style.fontSize = '27px'; ttsBoxEl.style.transform = 'translate(0px, 240px)';
+        }
+    }
+
+    // ==================== 面板切换 ====================
+    function openTool(panelId) {
+        document.getElementById('previewArea').style.display = 'none';
+        document.getElementById(panelId).classList.add('active');
+        if (panelId === 'panelTable') { initFilterSelects(); tablePage = 0; renderTableData(); }
+        if (panelId === 'panelForum') { showForumList(); }
+        if (panelId === 'panelActivity') { showActivityList(); initActivitySiteOptions(); }
+        if (panelId === 'panelKey') { showKeyList(); initKeySiteOptions(); }
+        if (panelId === 'panelAdd') { buildAddFormCheckboxes(); loadNickname(); }
+        if (panelId === 'panelMy') loadMyPage();
+        if (panelId === 'panelDoc') { renderDocList(); }
+        if (panelId === 'panelModify') { modifyPage = 0; selectedModifyIds.clear(); renderModifyList(); document.getElementById('modifyListView').style.display = 'block'; document.getElementById('modifyEditView').style.display = 'none'; document.getElementById('maintenanceContainer').style.display = 'none'; }
+        if (panelId === 'panelDelete') { document.getElementById('deleteContent').style.display = 'none'; }
+    }
+
+    function closeTool(panelId) {
+        document.getElementById(panelId).classList.remove('active');
+        document.getElementById('previewArea').style.display = '';
+        window.scrollTo(0, 0);
+    }
+
+    // ==================== 昵称管理 ====================
+    function getNickname() { return localStorage.getItem('momo_nickname') || ''; }
+    function saveNickname() {
+        const name = document.getElementById('myNickname') ? document.getElementById('myNickname').value.trim() : '';
+        localStorage.setItem('momo_nickname', name);
+    }
+    function loadNickname() { const nick = getNickname(); if (nick) document.getElementById('addInviter').value = nick; }
+    function loadMyNickname() { const nick = getNickname(); var inviterEl = document.getElementById('addInviter'); if (inviterEl && !inviterEl.value) inviterEl.value = nick; }
+
+    // ==================== 厂商→模型联动逻辑 ====================
+    function getAvailableModels(selectedVendors) {
+        if (selectedVendors.length === 0) return [];
+        let models = [];
+        selectedVendors.forEach(v => {
+            if (MODEL_MAP[v]) models.push(...MODEL_MAP[v]);
+        });
+        return [...new Set(models)];
+    }
+
+    function renderModelCheckboxes(containerId, selectedVendors, previouslySelectedModels = []) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const availableModels = getAvailableModels(selectedVendors);
+        if (availableModels.length === 0) {
+            container.innerHTML = '<div style="color:#7a9678; padding:10px;">请先选择厂商</div>';
+        } else {
+            container.innerHTML = availableModels.map(m => `<label><input type="checkbox" value="${m}" ${previouslySelectedModels.includes(m) ? 'checked' : ''}>${m}</label>`).join('');
+        }
+        if (customModels.length > 0) {
+            const customHtml = customModels.map(m => `<label><input type="checkbox" value="${m}" ${previouslySelectedModels.includes(m) ? 'checked' : ''}>${m} (自定义)</label>`).join('');
+            container.innerHTML += customHtml;
+        }
+        const hasCustomVendor = selectedVendors.some(v => !MODEL_MAP[v] && v !== '其他厂商');
+        const customModelArea = document.getElementById(containerId.replace('Checkbox', 'CustomModelArea') || 'addCustomModelArea');
+        if (customModelArea) {
+            customModelArea.style.display = (selectedVendors.length > 0 && availableModels.length === 0 && customModels.length === 0) || hasCustomVendor ? 'flex' : 'none';
+        }
+    }
+
+    function onVendorChange(source) {
+        const vendorCheckboxId = source === 'add' ? 'addVendorCheckbox' : 'modVendorCheckbox';
+        const modelCheckboxId = source === 'add' ? 'addModelCheckbox' : 'modModelCheckbox';
+        const selectedVendors = getCheckedValues(vendorCheckboxId);
+        const previouslySelected = getCheckedValues(modelCheckboxId);
+        renderModelCheckboxes(modelCheckboxId, selectedVendors, previouslySelected);
+        const customVendorArea = document.getElementById(source === 'add' ? 'addCustomVendorArea' : 'modCustomVendorArea');
+        if (customVendorArea) {
+            const hasCustom = selectedVendors.some(v => !MODEL_MAP[v] && !VENDOR_LIST.slice(0, -1).includes(v));
+            customVendorArea.style.display = hasCustom ? 'block' : 'none';
+        }
+    }
+
+    // ==================== 新建录入复选框 ====================
+    function buildAddFormCheckboxes() {
+        const vendorBox = document.getElementById('addVendorCheckbox');
+        vendorBox.innerHTML = VENDOR_LIST.map(v => `<label><input type="checkbox" value="${v}" onchange="onVendorChange('add')">${v}</label>`).join('');
+        vendorBox.innerHTML += `<label><input type="checkbox" value="自定义厂商" onchange="onVendorChange('add'); toggleCustomVendorInput('add')">自定义厂商</label>`;
+        document.getElementById('addModelCheckbox').innerHTML = '<div style="color:#7a9678; padding:10px;">请先选择厂商</div>';
+        document.getElementById('addRegStatusCheckbox').innerHTML = REG_SUB_OPTIONS.map(r => `<label><input type="checkbox" value="${r}">${r}</label>`).join('');
+    }
+
+    function toggleCustomVendorInput(source) {
+        const vendorCheckboxId = source === 'add' ? 'addVendorCheckbox' : 'modVendorCheckbox';
+        const customAreaId = source === 'add' ? 'addCustomVendorArea' : 'modCustomVendorArea';
+        const selectedVendors = getCheckedValues(vendorCheckboxId);
+        const hasCustom = selectedVendors.includes('自定义厂商');
+        document.getElementById(customAreaId).style.display = hasCustom ? 'block' : 'none';
+    }
+
+    function toggleCheckboxGroup(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('show');
+    }
+
+    function addCustomModel() {
+        const input = document.getElementById('addModelCustom');
+        const name = input.value.trim();
+        if (!name) return;
+        if (ALL_PREDEFINED_MODELS.includes(name) || customModels.includes(name)) { showToast('该模型已存在列表中！'); return; }
+        customModels.push(name);
+        const selectedVendors = getCheckedValues('addVendorCheckbox');
+        renderModelCheckboxes('addModelCheckbox', selectedVendors, getCheckedValues('addModelCheckbox'));
+        document.getElementById('addModelCheckbox').classList.add('show');
+        input.value = '';
+    }
+
+    function getCheckedValues(containerId) {
+        const checks = document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`);
+        return Array.from(checks).map(c => c.value).filter(v => v !== '自定义厂商');
+    }
+
+    function toggleRegSubOptions() {
+        const main = document.getElementById('addRegMain').value;
+        document.getElementById('regSubOptions').style.display = (main === '开放注册中' || main === '限时开放') ? 'block' : 'none';
+    }
+
+    function toggleTrialCustom() {
+        document.getElementById('trialCustomGroup').style.display = document.getElementById('addTrial').value === '自定义' ? 'block' : 'none';
+    }
+
+    function isAdmin() { return !!localStorage.getItem('momo_admin_token'); }
+    function refreshAdminStatus() {
+        if (!localStorage.getItem('momo_admin_token')) return;
+        // 本地校验：管理员 token 由本地密码比对写入（见 verifyAdminForDelete）
+    }
+    function refreshBlockList() {
+        // 管理员/黑名单为部署时配置的本地常量（LOCAL_ADMINS / LOCAL_BLOCKS）
+        adminList = LOCAL_ADMINS.slice();
+        blockList = LOCAL_BLOCKS.slice();
+    }
+
+    // ==================== 完整度计算 ====================
+    function calcCompleteness(site) {
+        const allFields = ['name','url','vendors', ...COMPLETENESS_FIELDS];
+        let filled = 0;
+        allFields.forEach(f => {
+            const val = site[f];
+            if (val !== null && val !== undefined && val !== '' && String(val).trim() !== '') filled++;
+        });
+        return filled / allFields.length;
+    }
+
+    // ==================== 查找站子 ====================
+function initFilterSelects() {
+    const vendorContainer = document.getElementById('filterVendorCheckboxes');
+    vendorContainer.innerHTML = VENDOR_LIST.map(v => `<label><input type="checkbox" value="${v}" onchange="onFilterVendorChange()">${v}</label>`).join('');
+    document.getElementById('filterVendorSelectAll').checked = false;
+}
+
+function onFilterVendorChange() {
+    const allChecked = VENDOR_LIST.every(v => document.querySelector(`#filterVendorCheckboxes input[value="${v}"]`)?.checked);
+    document.getElementById('filterVendorSelectAll').checked = allChecked;
+}
+
+function toggleFilterVendorAll() {
+    const isChecked = document.getElementById('filterVendorSelectAll').checked;
+    document.querySelectorAll('#filterVendorCheckboxes input').forEach(cb => cb.checked = isChecked);
+}
+
+function toggleMultiFilter() {
+    const area = document.getElementById('multiFilterArea');
+    area.style.display = area.style.display === 'none' || area.style.display === '' ? 'block' : 'none';
+}
+
+function toggleFavorite(id) {
+    if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+    else favorites.push(id);
+    localStorage.setItem('momo_favorites', JSON.stringify(favorites));
+    renderTableData();
+}
+
+function getFilterVendors() {
+    const checks = document.querySelectorAll('#filterVendorCheckboxes input[type="checkbox"]:checked');
+    return Array.from(checks).map(c => c.value);
+}
+
+async function renderTableData(resetPage = true) {
+    if (resetPage) tablePage = 0;
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    const selectedVendors = getFilterVendors();
+    const speedFilter = document.getElementById('filterSpeed').value;
+    const publicFilter = document.getElementById('filterPublic').value;
+    const checkinFilter = document.getElementById('filterCheckin').value;
+    const magicFilter = document.getElementById('filterMagic').value;
+    const starsFilter = document.getElementById('filterStars').value;
+    const statusFilter = document.getElementById('filterStatus').value;
+    const officialFilter = document.getElementById('filterOfficial').value;
+    const feeFilter = document.getElementById('filterFee').value;
+    const regFilter = document.getElementById('filterRegStatus').value;
+    const inviterFilter = document.getElementById('filterInviter').value.toLowerCase();
+    const sortOrder = document.getElementById('sortOrder').value;
+
+    let query = supa.from('sites').select('*').count('exact');
+
+    if (keyword) {
+        query = query.or(`name.ilike.%${keyword}%,url.ilike.%${keyword}%,note.ilike.%${keyword}%`);
+    }
+    if (selectedVendors.length > 0) {
+        const vendorFilters = selectedVendors.map(v => `vendors.ilike.%${v}%`).join(',');
+        query = query.or(vendorFilters);
+    }
+    if (speedFilter) query = query.eq('speed', speedFilter);
+    if (publicFilter) query = query.eq('public', publicFilter);
+    if (checkinFilter) query = query.eq('checkin', checkinFilter);
+    if (magicFilter) query = query.eq('magic', magicFilter);
+    if (starsFilter) query = query.eq('stars', parseInt(starsFilter));
+    if (statusFilter) query = query.eq('status', statusFilter);
+    if (officialFilter) query = query.eq('official', officialFilter);
+    if (feeFilter) query = query.eq('fee', feeFilter);
+    if (regFilter) query = query.ilike('reg_status', `%${regFilter}%`);
+    if (inviterFilter) query = query.ilike('inviter', `%${inviterFilter}%`);
+
+
+    if (sortOrder === 'new') query = query.order('id', { ascending: false });
+    else if (sortOrder === 'star') query = query.order('stars', { ascending: false });
+    else query = query.order('id', { ascending: false });
+
+    query = query.limit(PAGE_SIZE).offset(tablePage * PAGE_SIZE);
+
+    const { data, count, error } = await query;
+    if (error) {
+        document.getElementById('dataListContainer').innerHTML = `<div style="text-align:center; color:#7a9678; padding:30px;">加载失败：${error.message}</div>`;
+        return;
+    }
+
+    tableTotal = count || (data ? data.length : 0);
+    const container = document.getElementById('dataListContainer');
+    if (!data || data.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#7a9678; padding:30px;">没有找到匹配的站子</div>`;
+    } else {
+        container.innerHTML = data.map(item => {
+            const webUrl = item.web_url || item.url;
+            const isFav = favorites.includes(item.id);
+            const checked = selectedTableIds.has(item.id) ? 'checked' : '';
+            return `
+            <div class="data-item">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" class="table-check" value="${item.id}" ${checked} onchange="onTableCheckChange()" onclick="event.stopPropagation();" style="flex-shrink:0;">
+                    <button class="star-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${item.id})" style="position:static;">★</button>
+                    <div style="flex:1; cursor:pointer;" onclick="openDetailView(${item.id})">
+                        <h4 style="color:#4a6f48; margin-bottom:2px;">${item.name} ${item.magic === '是' ? '(需特殊网络)' : ''}</h4>
+                        <div style="font-size:12px; color:#7a9678;">模型：${item.models || ''} | 状态：${item.status || ''}</div>
+                        <div class="url-row"><span class="url-text">${webUrl}</span><button class="btn-copy" onclick="event.stopPropagation(); copyTextByValue('${webUrl.replace(/'/g, "\\'")}')">复制</button></div>
+                        <div style="font-size:12px; color:#7a9678;">厂商：${item.vendors || ''} | 邀请人：${item.inviter || ''}</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    renderTablePagination();
+    document.getElementById('tableSelectAll').checked = false;
+}
+
+function renderTablePagination() {
+    const totalPages = Math.ceil(tableTotal / PAGE_SIZE);
+    document.getElementById('tablePagination').innerHTML = `
+        <button onclick="tablePage=0;renderTableData(false)" ${tablePage===0?'disabled':''}>首页</button>
+        <button onclick="tablePage--;renderTableData(false)" ${tablePage===0?'disabled':''}>上一页</button>
+        <span class="page-info">第 ${tablePage+1} 页 / 共 ${Math.max(totalPages,1)} 页（${tableTotal}条）</span>
+        <button onclick="tablePage++;renderTableData(false)" ${tablePage>=totalPages-1?'disabled':''}>下一页</button>
+        <button onclick="tablePage=${totalPages-1};renderTableData(false)" ${tablePage>=totalPages-1?'disabled':''}>末页</button>
+    `;
+}
+
+function toggleTableSelectAll() {
+    const checked = document.getElementById('tableSelectAll').checked;
+    document.querySelectorAll('.table-check').forEach(cb => {
+        cb.checked = checked;
+        if (checked) selectedTableIds.add(parseInt(cb.value));
+        else selectedTableIds.delete(parseInt(cb.value));
+    });
+}
+
+function onTableCheckChange() {
+    document.querySelectorAll('.table-check').forEach(cb => {
+        if (cb.checked) selectedTableIds.add(parseInt(cb.value));
+        else selectedTableIds.delete(parseInt(cb.value));
+    });
+    const allChecked = document.querySelectorAll('.table-check').length > 0 && document.querySelectorAll('.table-check:checked').length === document.querySelectorAll('.table-check').length;
+    document.getElementById('tableSelectAll').checked = allChecked;
+}
+    // ==================== 查找站子详情（独立视图） ====================
+async function openDetailView(id) {
+    const { data: item, error } = await supa.from('sites').select('*').eq('id', id).single();
+    if (error || !item) return;
+    currentDetailId = id;
+    document.getElementById('tableViewList').style.display = 'none';
+    const detailDiv = document.getElementById('tableViewDetail');
+    detailDiv.style.display = 'block';
+    const webUrl = item.web_url || item.url;
+    detailDiv.innerHTML = `
+        <div class="panel-header"><span class="btn-back" onclick="closeDetailView()">← 返回列表</span><span class="panel-title">${item.name}</span></div>
+        <div style="background:#fff; border-radius:14px; padding:15px; border:1px solid #e4efe2;">
+            <div style="font-size:13px; color:#7a9678; margin-bottom:10px;">模型：${item.models || ''} | 状态：${item.status || ''} | 推荐：${item.stars ? '⭐'.repeat(parseInt(item.stars)) : ''}</div>
+            <div class="url-row"><span class="url-text">${webUrl}</span><button class="btn-copy" onclick="copyTextByValue('${webUrl.replace(/'/g, "\\'")}')">复制</button><a href="${webUrl}" target="_blank" class="btn-visit" style="margin-top:0;">访问</a></div>
+            <div class="url-row"><span class="url-text">${item.url}</span><button class="btn-copy" onclick="copyTextByValue('${item.url.replace(/'/g, "\\'")}')">复制</button></div>
+            <span class="detail-label">详细属性</span>
+            <div style="font-size:13px; color:#555; background:#f4f9f2; border-radius:10px; padding:10px; margin:6px 0;">
+                速度：${item.speed || ''} | 公益：${item.public || ''} | 签到：${item.checkin || ''} | 特殊网络：${item.magic || ''}<br>
+                厂商：${item.vendors || ''} | 类型：${item.official || ''}${item.fee ? `<br>费率：${item.fee}` : ''}
+                ${item.reg_status ? `<br>注册状态：${item.reg_status}` : ''}
+                ${item.trial && item.trial !== '无' ? `<br>试吃福利：${item.trial}` : ''}
+            </div>
+            <div style="font-size:13px; color:#4a6f48; margin:6px 0;">邀请人：${item.inviter || ''}</div>
+            ${item.contact ? `<div style="font-size:13px; color:#4a6f48;">站方联系方式：${item.contact} <button class="btn-copy" onclick="copyTextByValue('${item.contact.replace(/'/g, "\\'")}')">复制</button></div>` : ''}
+            ${item.note ? `<div style="margin:6px 0;"><span class="detail-label">备注</span><div style="font-size:13px; color:#555; background:#f4f9f2; border-radius:10px; padding:10px;">${item.note}</div></div>` : ''}
+            <span class="detail-label">评分与评价</span>
+            <div style="font-size:13px; color:#4a6f48; margin-top:4px;">
+                <span>平均分：<span id="detailAvg" style="font-weight:bold;">加载中...</span></span>
+                <span>|</span>
+                <span>参与：<span id="detailCount">0</span>人</span>
+            </div>
+            <div style="margin:10px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:#f4f9f2; padding:10px; border-radius:10px;">
+                <select id="rateSelect" style="padding:5px; border:1px solid #d9e8d7; border-radius:6px;"><option value="5">5星</option><option value="4">4星</option><option value="3">3星</option><option value="2">2星</option><option value="1">1星</option></select>
+                <input type="text" id="rateComment" placeholder="选填：写写你的评价..." style="flex:1; padding:5px; border:1px solid #d9e8d7; border-radius:6px; min-width:100px;">
+                <button class="btn-copy" style="background:#4a6f48; color:#fff; padding:5px 16px;" onclick="submitRatingFromDetail()">提交评分</button>
+            </div>
+            <div id="rateList" style="font-size:12px; color:#555; margin-top:5px;"></div>
+        </div>
+    `;
+    await renderRatings(item);
+    detailDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeDetailView() {
+    document.getElementById('tableViewDetail').style.display = 'none';
+    document.getElementById('tableViewList').style.display = 'block';
+    currentDetailId = null;
+    renderTableData(false);
+}
+
+async function submitRatingFromDetail() {
+    if (!currentDetailId) return;
+    const star = parseInt(document.getElementById('rateSelect').value);
+    const comment = document.getElementById('rateComment').value.trim();
+    const { error } = await supa.from('ratings').insert([{
+        site_id: currentDetailId, star, comment, nickname: getNickname() || '匿名'
+    }]);
+    if (error) { showToast('提交失败：' + error.message); return; }
+    document.getElementById('rateComment').value = '';
+    const { data: item } = await supa.from('sites').select('*').eq('id', currentDetailId).single();
+    if (item) await renderRatings(item);
+    showToast('评分已提交');
+}
+
+async function renderRatings(item) {
+    const { data: ratings } = await supa.from('ratings').select('*').eq('site_id', item.id).order('created_at', { ascending: false });
+    const avg = ratings && ratings.length > 0 ? (ratings.reduce((s, r) => s + r.star, 0) / ratings.length) : 0;
+    const avgEl = document.getElementById('detailAvg');
+    const countEl = document.getElementById('detailCount');
+    if (avgEl) avgEl.textContent = ratings && ratings.length > 0 ? avg.toFixed(1) + ' 星' : '暂无评分';
+    if (countEl) countEl.textContent = ratings ? ratings.length : 0;
+    const rateList = document.getElementById('rateList');
+    if (rateList) rateList.innerHTML = (ratings || []).map(r => `<div style="padding:4px 0; border-bottom:1px dashed #eee;">${'⭐'.repeat(r.star)} - ${r.comment || ''} (${r.nickname || ''})</div>`).join('');
+}
+
+    // ==================== 复制功能 ====================
+    function copyTextByValue(text) {
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
+        else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('已复制'); }
+    }
+    function copyGroupNumber() { copyTextByValue('momo\u4e4b\u5bb6:1104281873 \u888b\u9f20\u4e4b\u5bb6:623201529 \u6dd8\u5b9d\u4e4b\u5bb6:1080802627'); }
+// ==================== 一键核对网址（新增） ====================
+function toggleCheckPanel() {
+    const area = document.getElementById('checkPanel');
+    area.style.display = area.style.display === 'none' || area.style.display === '' ? 'block' : 'none';
+}
+
+async function runCheck() {
+    const rawText = document.getElementById('checkInput').value.trim();
+    if (!rawText) { showToast('请粘贴一些网址再核对哦~'); return; }
+
+    // 提取网址
+    const urls = [...new Set(rawText.match(/https?:\/\/[^\s,，。；;]+/g) || [])];
+    if (urls.length === 0) { showToast('没有检测到有效的网址，请检查一下~'); return; }
+
+    document.getElementById('checkResult').style.display = 'block';
+    document.getElementById('checkResult').innerHTML = '<div style="text-align:center; color:#7a9678; padding:20px;">正在核对中...</div>';
+
+    // 批量查询
+    const { data: byUrl } = await supa.from('sites').select('*').in('url', urls);
+    const { data: byWebUrl } = await supa.from('sites').select('*').in('web_url', urls);
+    const allMatched = [...(byUrl || []), ...(byWebUrl || [])];
+
+    // 去重
+    const matchedMap = new Map();
+    allMatched.forEach(s => matchedMap.set(s.id, s));
+    const matchedSites = Array.from(matchedMap.values());
+
+    const matchedUrls = new Set(matchedSites.map(s => s.url).concat(matchedSites.map(s => s.web_url)));
+    const unmatchedUrls = urls.filter(u => !matchedUrls.has(u));
+
+    let resultHtml = '';
+
+    // 已收录
+    if (matchedSites.length > 0) {
+        resultHtml += `<div style="font-weight:bold; color:#365e34; margin-bottom:8px;">这些站子已经在库里啦（${matchedSites.length}个）：</div>`;
+        matchedSites.forEach(s => {
+            const pct = Math.round(calcCompleteness(s) * 100);
+            const isProtected = s.maintainer_since && (new Date() - new Date(s.maintainer_since)) < 90 * 24 * 60 * 60 * 1000;
+            if (pct >= 50) {
+                resultHtml += `<div style="padding:6px 0; border-bottom:1px dashed #e4efe2;">${s.name} · 邀请人：${s.inviter || '未知'} · 完整度${pct}% · ${isProtected ? '保护期内' : '可维护'} <button class="btn-copy" onclick="openDetailView(${s.id})">查看详情</button></div>`;
+            } else {
+                resultHtml += `<div style="padding:6px 0; border-bottom:1px dashed #e4efe2;">${s.name} · 完整度${pct}%（信息还不太全，在公共维护池里哦） <button class="btn-copy" onclick="closeTool('panelTable'); openTool('panelModify'); setTimeout(()=>switchModifyTab('maintenance'), 100);">去维护</button></div>`;
+            }
+        });
+        resultHtml += `<div style="margin-top:10px;"><button class="filter-btn" onclick="batchFavCheck([${matchedSites.map(s => s.id).join(',')}])">一键收藏以上所有站子</button></div>`;
+    }
+
+    // 未收录
+    if (unmatchedUrls.length > 0) {
+        resultHtml += `<div style="font-weight:bold; color:#c0392b; margin-top:15px; margin-bottom:8px;">这些站子还没被收录哦（${unmatchedUrls.length}个）：</div>`;
+        unmatchedUrls.forEach(u => {
+            resultHtml += `<div style="padding:6px 0; border-bottom:1px dashed #e4efe2;">${u} <button class="btn-copy" style="background:#4a6f48; color:#fff;" onclick="goAddWithUrl('${u.replace(/'/g, "\\'")}')">去录入</button></div>`;
+        });
+    }
+
+    if (matchedSites.length === 0 && unmatchedUrls.length === 0) {
+        resultHtml = '<div style="text-align:center; color:#7a9678;">没有检测到网址，请检查一下格式~</div>';
+    }
+
+    document.getElementById('checkResult').innerHTML = resultHtml;
+}
+
+async function batchFavCheck(ids) {
+    ids.forEach(id => { if (!favorites.includes(id)) favorites.push(id); });
+    localStorage.setItem('momo_favorites', JSON.stringify(favorites));
+    showToast('已收藏全部站子~');
+}
+
+function goAddWithUrl(url) {
+    closeTool('panelTable');
+    openTool('panelAdd');
+    setTimeout(() => {
+        const webUrlInput = document.getElementById('addWebUrl');
+        if (webUrlInput) webUrlInput.value = url;
+        const urlInput = document.getElementById('addUrl');
+        if (urlInput) urlInput.value = url;
+    }, 200);
+}
+    // ==================== 新建录入提交 ====================
+async function submitNewData() {
+    const regMain = document.getElementById('addRegMain').value;
+    let regStatus = regMain;
+    if (regMain === '开放注册中' || regMain === '限时开放') {
+        const sub = getCheckedValues('addRegStatusCheckbox');
+        if (sub.length > 0) regStatus += ', ' + sub.join(', ');
+    }
+    const trialVal = document.getElementById('addTrial').value;
+    const trialText = trialVal === '自定义' ? document.getElementById('addTrialCustom').value.trim() : trialVal;
+
+    const name = document.getElementById('addName').value.trim();
+    const vendorsRaw = getCheckedValues('addVendorCheckbox');
+    const customVendorInput = document.getElementById('addCustomVendor');
+    if (customVendorInput && customVendorInput.value.trim()) {
+        vendorsRaw.push(customVendorInput.value.trim());
+    }
+    const vendors = [...new Set(vendorsRaw)];
+    const models = getCheckedValues('addModelCheckbox');
+    const webUrl = document.getElementById('addWebUrl').value.trim();
+    const url = document.getElementById('addUrl').value.trim() || webUrl;
+    const inviter = document.getElementById('addInviter').value.trim() || getNickname() || '匿名';
+
+    if (!name || !webUrl || vendors.length === 0) { showToast('网站名称、网址、模型厂商是必填项！'); return; }
+    if (blockList.includes(getNickname())) { showToast('你已被拉黑，无法录入新数据。'); return; }
+
+    // URL查重：检查网址是否已存在
+    const { data: existSites } = await supa.from('sites').select('id,name').or(`url.eq.${url},web_url.eq.${webUrl}`).limit(1);
+    if (existSites && existSites.length > 0) {
+        showToast('该网址已被收录（站子：' + existSites[0].name + '），不能重复录入~');
+        return;
+    }
+
+    // 空字符串转 null
+    const toNull = (val) => (val === '' || val === null || val === undefined) ? null : val;
+
+    const newItem = {
+        id: Date.now(),
+        name,
+        models: models.join(', '),
+        vendors: vendors.join(', '),
+        url,
+        web_url: webUrl,
+        speed: toNull(document.getElementById('addSpeed').value),
+        public: toNull(document.getElementById('addPublic').value),
+        checkin: toNull(document.getElementById('addCheckin').value),
+        magic: toNull(document.getElementById('addMagic').value),
+        // 修复：0星存为 null，避免数据库约束报错
+        stars: (() => {
+            const raw = document.getElementById('addStars').value;
+            const num = parseInt(raw);
+            return isNaN(num) || num === 0 ? null : num;
+        })(),
+        status: toNull(document.getElementById('addStatus').value),
+        official: toNull(document.getElementById('addOfficial').value),
+        fee: toNull(document.getElementById('addFee').value),
+        reg_status: regStatus || null,
+        trial: trialText || null,
+        contact: document.getElementById('addContact').value.trim() || null,
+        inviter,
+        note: document.getElementById('addNote').value.trim() || null,
+        protection_until: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString()
+    };
+
+    const completeness = calcCompleteness(newItem);
+
+    if (completeness < 0.5) {
+        const confirmed = confirm('⚠️ 信息完整度不足50%\n\n后续会开启信息维护功能# (后续通知略)');
+        if (!confirmed) return;
+    } else {
+        const userId = myProfile ? myProfile.id : null;
+        newItem.maintainer = userId;
+        newItem.maintainer_since = new Date().toISOString();
+    }
+
+    const { error } = await supa.from('sites').insert([newItem]);
+    if (error) { showToast('添加失败：' + error.message); return; }
+
+    ['addName','addUrl','addWebUrl','addContact','addInviter','addNote','addTrialCustom','addModelCustom','addCustomVendor'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('addRegMain').value = ''; document.getElementById('regSubOptions').style.display = 'none';
+    document.getElementById('addTrial').value = ''; document.getElementById('trialCustomGroup').style.display = 'none';
+    document.getElementById('addSpeed').value = ''; document.getElementById('addPublic').value = ''; document.getElementById('addCheckin').value = '';
+    document.getElementById('addMagic').value = ''; document.getElementById('addStars').value = '0'; // 默认复位0星
+    document.getElementById('addStatus').value = ''; document.getElementById('addOfficial').value = ''; document.getElementById('addFee').value = '';
+    ['addModelCheckbox','addVendorCheckbox','addRegStatusCheckbox'].forEach(id => {
+        document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(cb => cb.checked = false);
+        document.getElementById(id).classList.remove('show');
+    });
+    document.getElementById('addModelCheckbox').innerHTML = '<div style="color:#7a9678; padding:10px;">请先选择厂商</div>';
+    document.getElementById('addCustomVendorArea').style.display = 'none';
+    document.getElementById('addCustomModelArea').style.display = 'none';
+    showToast('录入成功！');
+    if (confirm('是否跳转到查找站子查看？')) { closeTool('panelAdd'); openTool('panelTable'); }
+}
+// ==================== 修改面板（三标签切换） ====================
+function switchModifyTab(tab) {
+    document.getElementById('modifyListView').style.display = 'none';
+    document.getElementById('modifyEditView').style.display = 'none';
+    document.getElementById('maintenanceContainer').style.display = 'none';
+    document.getElementById('failurePoolContainer').style.display = 'none';
+
+    document.getElementById('tabModifyList').style.background = '';
+    document.getElementById('tabModifyList').style.color = '';
+    document.getElementById('tabMaintenance').style.background = '';
+    document.getElementById('tabMaintenance').style.color = '';
+    document.getElementById('tabFailurePool').style.background = '';
+    document.getElementById('tabFailurePool').style.color = '';
+
+    if (tab === 'list') {
+        document.getElementById('modifyListView').style.display = 'block';
+        document.getElementById('tabModifyList').style.background = '#4a6f48';
+        document.getElementById('tabModifyList').style.color = '#fff';
+        modifyPage = 0; selectedModifyIds.clear(); renderModifyList();
+    } else if (tab === 'maintenance') {
+        document.getElementById('tabMaintenance').style.background = '#4a6f48';
+        document.getElementById('tabMaintenance').style.color = '#fff';
+        showMaintenance();
+    } else if (tab === 'failure') {
+        document.getElementById('tabFailurePool').style.background = '#4a6f48';
+        document.getElementById('tabFailurePool').style.color = '#fff';
+        showFailurePool();
+    }
+}
+
+async function renderModifyList(resetPage = true) {
+    if (resetPage) modifyPage = 0;
+    const container = document.getElementById('modifyListContainer');
+    const keyword = document.getElementById('modifySearchInput').value.toLowerCase();
+    let query = supa.from('sites').select('*').count('exact');
+    if (keyword) query = query.or(`name.ilike.%${keyword}%,url.ilike.%${keyword}%`);
+    query = query.order('id', { ascending: false }).limit(PAGE_SIZE).offset(modifyPage * PAGE_SIZE);
+    const { data, count } = await query;
+    modifyTotal = count || (data ? data.length : 0);
+    container.innerHTML = (data || []).map(item => `
+        <div class="data-item">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" class="modify-check" value="${item.id}" ${selectedModifyIds.has(item.id) ? 'checked' : ''} onchange="onModifyCheckChange()" onclick="event.stopPropagation();">
+                <div style="flex:1; cursor:pointer;" onclick="openModifyEditView(${item.id})">
+                    <h4 style="color:#4a6f48;">${item.name}</h4>
+                    <div style="font-size:12px; color:#7a9678;">${item.web_url || item.url}</div>
+                </div>
+                <button class="edit-btn" onclick="openModifyEditView(${item.id})">修改</button>
+            </div>
+        </div>
+    `).join('');
+    if ((!data || data.length === 0) && !keyword) {
+        container.innerHTML = '<div style="text-align:center; color:#7a9678; padding:30px;">没有数据</div>';
+    }
+    renderModifyPagination();
+    document.getElementById('modifySelectAll').checked = false;
+}
+
+function renderModifyPagination() {
+    const totalPages = Math.ceil(modifyTotal / PAGE_SIZE);
+    document.getElementById('modifyPagination').innerHTML = `
+        <button onclick="modifyPage=0;renderModifyList(false)" ${modifyPage===0?'disabled':''}>首页</button>
+        <button onclick="modifyPage--;renderModifyList(false)" ${modifyPage===0?'disabled':''}>上一页</button>
+        <span class="page-info">第 ${modifyPage+1} 页 / 共 ${Math.max(totalPages,1)} 页（${modifyTotal}条）</span>
+        <button onclick="modifyPage++;renderModifyList(false)" ${modifyPage>=totalPages-1?'disabled':''}>下一页</button>
+        <button onclick="modifyPage=${totalPages-1};renderModifyList(false)" ${modifyPage>=totalPages-1?'disabled':''}>末页</button>
+    `;
+}
+
+function toggleModifySelectAll() {
+    const checked = document.getElementById('modifySelectAll').checked;
+    document.querySelectorAll('.modify-check').forEach(cb => {
+        cb.checked = checked;
+        if (checked) selectedModifyIds.add(parseInt(cb.value));
+        else selectedModifyIds.delete(parseInt(cb.value));
+    });
+}
+
+function onModifyCheckChange() {
+    document.querySelectorAll('.modify-check').forEach(cb => {
+        if (cb.checked) selectedModifyIds.add(parseInt(cb.value));
+        else selectedModifyIds.delete(parseInt(cb.value));
+    });
+    const allChecked = document.querySelectorAll('.modify-check').length > 0 && document.querySelectorAll('.modify-check:checked').length === document.querySelectorAll('.modify-check').length;
+    document.getElementById('modifySelectAll').checked = allChecked;
+}
+
+// ==================== 修改面板编辑视图（独立全屏） ====================
+async function openModifyEditView(id) {
+    const { data: item } = await supa.from('sites').select('*').eq('id', id).single();
+    if (!item) return;
+    if (blockList.includes(getNickname())) { showToast('你已被拉黑，无法修改数据。'); return; }
+
+    document.getElementById('modifyListView').style.display = 'none';
+    document.getElementById('maintenanceContainer').style.display = 'none';
+    document.getElementById('failurePoolContainer').style.display = 'none';
+    const editView = document.getElementById('modifyEditView');
+    editView.style.display = 'block';
+
+    const allVendorChecks = VENDOR_LIST.map(v => `<label><input type="checkbox" value="${v}" ${item.vendors && item.vendors.includes(v) ? 'checked' : ''} onchange="onVendorChange('mod')">${v}</label>`).join('');
+    const vendorHtml = allVendorChecks + `<label><input type="checkbox" value="自定义厂商" ${item.vendors && !VENDOR_LIST.slice(0,-1).some(v => item.vendors.includes(v)) && item.vendors ? 'checked' : ''} onchange="onVendorChange('mod'); toggleCustomVendorInput('mod')">自定义厂商</label>`;
+
+    const currentUserId = myProfile ? myProfile.id : null;
+    const isMaintainer = item.maintainer === currentUserId;
+    // 3个月保护期
+    const isProtected = item.maintainer_since && (new Date() - new Date(item.maintainer_since)) < 90 * 24 * 60 * 60 * 1000;
+    const canEditUrl = !isProtected || isMaintainer || isAdmin();
+
+    editView.innerHTML = `
+        <div class="panel-header"><span class="btn-back" onclick="closeModifyEditView()">← 返回列表</span><span class="panel-title">修改：${item.name}</span></div>
+        ${isProtected && !isMaintainer ? `<div style="background:#fff3cd; padding:10px; border-radius:10px; margin-bottom:10px; font-size:13px; color:#856404;">该站子目前在3个月保护期内，你无法修改URL和链接，但可以补充其他信息。</div>` : ''}
+        <div style="background:#fff; border-radius:14px; padding:15px; border:1px solid #d9e8d7;">
+            <div class="form-group"><label>网站名称</label><input id="modName" value="${item.name.replace(/"/g, '&quot;')}"></div>
+            <div class="form-group"><label>模型厂商（可多选） <button class="expand-btn" onclick="toggleCheckboxGroup('modVendorCheckbox')">v</button></label>
+                <div class="checkbox-group" id="modVendorCheckbox">${vendorHtml}</div>
+                <div id="modCustomVendorArea" style="display:none; margin-top:6px;">
+                    <input type="text" id="modCustomVendor" placeholder="输入自定义厂商名称" value="${(!VENDOR_LIST.slice(0,-1).some(v => item.vendors && item.vendors.includes(v)) && item.vendors) ? item.vendors.split(',').filter(v => !VENDOR_LIST.includes(v)).join(',') : ''}">
+                </div>
+            </div>
+            <div class="form-group"><label>模型选择（选填） <button class="expand-btn" onclick="toggleCheckboxGroup('modModelCheckbox')">v</button></label>
+                <div class="checkbox-group" id="modModelCheckbox"></div>
+                <div id="modCustomModelArea" style="display:none;" class="add-model-row">
+                    <input type="text" id="modModelCustom" placeholder="输入自定义模型名称">
+                    <button onclick="addModCustomModel()">添加</button>
+                </div>
+            </div>
+            <div class="form-group"><label>URL（API地址）${!canEditUrl ? ' 保护中' : ''}</label><input id="modUrl" value="${item.url.replace(/"/g, '&quot;')}" ${!canEditUrl ? 'disabled' : ''}></div>
+            <div class="form-group"><label>网址（显示链接）${!canEditUrl ? ' 保护中' : ''}</label><input id="modWebUrl" value="${(item.web_url||'').replace(/"/g, '&quot;')}" ${!canEditUrl ? 'disabled' : ''}></div>
+            <div class="form-group"><label>调用速度</label><select id="modSpeed">${['','快','一般','慢'].map(s => `<option value="${s}" ${(item.speed||'')===s?'selected':''}>${s||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>是否公益</label><select id="modPublic">${['','是','否'].map(v => `<option value="${v}" ${(item.public||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>可签到</label><select id="modCheckin">${['','是','否'].map(v => `<option value="${v}" ${(item.checkin||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>特殊网络</label><select id="modMagic">${['','是','否'].map(v => `<option value="${v}" ${(item.magic||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>推荐指数</label><select id="modStars">${['',5,4,3,2,1].map(s => `<option value="${s}" ${(item.stars||'')==s?'selected':''}>${s||'不填'}${s?'星':''}</option>`).join('')}</select></div>
+            <div class="form-group"><label>状态</label><select id="modStatus" onchange="onModStatusChange()">${['','正常','失效','已下线'].map(s => `<option value="${s}" ${(item.status||'')===s?'selected':''}>${s||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>官方直营/中转</label><select id="modOfficial">${['','官方直营','第三方中转'].map(v => `<option value="${v}" ${(item.official||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>费率</label><select id="modFee">${['','免费','低','中','高'].map(v => `<option value="${v}" ${(item.fee||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>注册状态</label><select id="modRegMain" onchange="toggleModRegSub()">${['','开放注册中','限时开放','暂不开放'].map(v => `<option value="${v}" ${(item.reg_status||'').split(',')[0].trim()===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group" id="modRegSubOptions" style="display:${item.reg_status && (item.reg_status.includes('开放注册中')||item.reg_status.includes('限时开放')) ? 'block' : 'none'};">
+                <label>注册方式（可多选）</label>
+                <div class="checkbox-group" id="modRegStatusCheckbox" style="display:flex;">${REG_SUB_OPTIONS.map(r => `<label><input type="checkbox" value="${r}" ${item.reg_status && item.reg_status.includes(r)?'checked':''}>${r}</label>`).join('')}</div>
+            </div>
+            <div class="form-group"><label>试吃福利</label><select id="modTrial" onchange="toggleModTrialCustom()">${['','无','送少量','送中等','送大量','自定义'].map(v => `<option value="${v}" ${(item.trial||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group" id="modTrialCustomGroup" style="display:${item.trial==='自定义'?'block':'none'};"><input id="modTrialCustom" value="${item.trial==='自定义'?item.trial:''}" placeholder="自定义福利描述"></div>
+            <div class="form-group"><label>站方联系方式</label><input id="modContact" value="${(item.contact||'').replace(/"/g, '&quot;')}"></div>
+            <div class="form-group"><label>备注</label><textarea id="modNote" rows="3">${(item.note||'').replace(/"/g, '&quot;')}</textarea></div>
+            <button class="btn-submit" onclick="saveModify(${id})">保存修改</button>
+        </div>
+    `;
+
+    const vendors = item.vendors ? item.vendors.split(',').map(v => v.trim()) : [];
+    const models = item.models ? item.models.split(',').map(m => m.trim()) : [];
+    renderModelCheckboxes('modModelCheckbox', vendors, models);
+    document.getElementById('modCustomVendorArea').style.display = vendors.some(v => !VENDOR_LIST.slice(0, -1).includes(v)) ? 'block' : 'none';
+    editView.scrollIntoView({ behavior: 'smooth' });
+}
+
+function onModStatusChange() {
+    const status = document.getElementById('modStatus').value;
+    if (status === '失效') {
+        showToast('注意哦，如果这个标记被纠错超过3次，你会失去1个维护名额呢。确定要继续吗？');
+    }
+}
+
+function addModCustomModel() {
+    const input = document.getElementById('modModelCustom');
+    const name = input.value.trim();
+    if (!name) return;
+    if (customModels.includes(name) || ALL_PREDEFINED_MODELS.includes(name)) { showToast('该模型已存在！'); return; }
+    customModels.push(name);
+    const vendors = getCheckedValues('modVendorCheckbox');
+    const prevModels = getCheckedValues('modModelCheckbox');
+    prevModels.push(name);
+    renderModelCheckboxes('modModelCheckbox', vendors, prevModels);
+    document.getElementById('modModelCheckbox').classList.add('show');
+    input.value = '';
+}
+
+function closeModifyEditView() {
+    document.getElementById('modifyEditView').style.display = 'none';
+    document.getElementById('modifyListView').style.display = 'block';
+    renderModifyList(false);
+}
+
+function toggleModRegSub() {
+    const main = document.getElementById('modRegMain').value;
+    document.getElementById('modRegSubOptions').style.display = (main === '开放注册中' || main === '限时开放') ? 'block' : 'none';
+}
+
+function toggleModTrialCustom() {
+    document.getElementById('modTrialCustomGroup').style.display = document.getElementById('modTrial').value === '自定义' ? 'block' : 'none';
+}
+
+async function saveModify(id) {
+    const { data: item } = await supa.from('sites').select('*').eq('id', id).single();
+    if (!item) return;
+
+    const currentUserId = myProfile ? myProfile.id : null;
+    const isMaintainer = item.maintainer === currentUserId;
+    const isProtected = item.maintainer_since && (new Date() - new Date(item.maintainer_since)) < 90 * 24 * 60 * 60 * 1000;
+    const canEditUrl = !isProtected || isMaintainer || isAdmin();
+
+    const fields = [
+        { key: 'name', old: item.name, newVal: document.getElementById('modName').value.trim() },
+        { key: 'speed', old: item.speed, newVal: document.getElementById('modSpeed').value },
+        { key: 'public', old: item.public, newVal: document.getElementById('modPublic').value },
+        { key: 'checkin', old: item.checkin, newVal: document.getElementById('modCheckin').value },
+        { key: 'magic', old: item.magic, newVal: document.getElementById('modMagic').value },
+        { key: 'stars', old: item.stars, newVal: document.getElementById('modStars').value ? parseInt(document.getElementById('modStars').value) : null },
+        { key: 'status', old: item.status, newVal: document.getElementById('modStatus').value },
+        { key: 'official', old: item.official, newVal: document.getElementById('modOfficial').value },
+        { key: 'fee', old: item.fee || '', newVal: document.getElementById('modFee').value },
+        { key: 'contact', old: item.contact || '', newVal: document.getElementById('modContact').value.trim() },
+        { key: 'note', old: item.note || '', newVal: document.getElementById('modNote').value.trim() },
+    ];
+
+    if (canEditUrl) {
+        fields.push({ key: 'url', old: item.url, newVal: document.getElementById('modUrl').value.trim() });
+        fields.push({ key: 'web_url', old: item.web_url || '', newVal: document.getElementById('modWebUrl').value.trim() });
+    }
+
+    const newModels = getCheckedValues('modModelCheckbox').join(', ');
+    let vendorsRaw = getCheckedValues('modVendorCheckbox');
+    const customVendorInput = document.getElementById('modCustomVendor');
+    if (customVendorInput && customVendorInput.value.trim()) {
+        vendorsRaw.push(customVendorInput.value.trim());
+    }
+    const newVendors = [...new Set(vendorsRaw)].join(', ');
+
+    const regMain = document.getElementById('modRegMain').value;
+    let newRegStatus = regMain;
+    if (regMain === '开放注册中' || regMain === '限时开放') {
+        const sub = getCheckedValues('modRegStatusCheckbox');
+        if (sub.length > 0) newRegStatus += ', ' + sub.join(', ');
+    }
+
+    const trialVal = document.getElementById('modTrial').value;
+    const trialText = trialVal === '自定义' ? document.getElementById('modTrialCustom').value.trim() : trialVal;
+
+    fields.push({ key: 'models', old: item.models, newVal: newModels });
+    fields.push({ key: 'vendors', old: item.vendors, newVal: newVendors });
+    fields.push({ key: 'reg_status', old: item.reg_status || '', newVal: newRegStatus });
+    fields.push({ key: 'trial', old: item.trial || '', newVal: trialText });
+
+    // 如果状态改为失效，记录标记人
+    const newStatus = document.getElementById('modStatus').value;
+    if (newStatus === '失效' && item.status !== '失效') {
+        const nick = getNickname();
+        if (nick) {
+            await supa.from('update_logs').insert([{
+                site_id: id, field: '标记失效', old_value: item.status || '正常', new_value: '失效', nickname: nick
+            }]);
+        }
+    }
+
+    const updateObj = {};
+    const logEntries = [];
+    fields.forEach(f => {
+        if (String(f.old) !== String(f.newVal)) {
+            updateObj[f.key] = f.newVal;
+            logEntries.push({
+                site_id: id, field: f.key, old_value: String(f.old), new_value: f.newVal, nickname: getNickname() || '匿名'
+            });
+        }
+    });
+
+    if (Object.keys(updateObj).length > 0) {
+        updateObj.updated_at = new Date().toISOString();
+        const { error } = await supa.from('sites').update(updateObj).eq('id', id);
+        if (error) { showToast('修改失败：' + error.message); return; }
+        if (logEntries.length > 0) await supa.from('update_logs').insert(logEntries);
+    }
+
+    showToast('修改已保存！');
+    closeModifyEditView();
+}
+
+function toggleModifyBatch() {
+    const area = document.getElementById('modifyBatchArea');
+    area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    updateBatchValueOptions();
+}
+
+function updateBatchValueOptions() {
+    const field = document.getElementById('batchField').value;
+    const valSel = document.getElementById('batchValue');
+    if (field === 'status') valSel.innerHTML = '<option value="正常">正常</option><option value="失效">失效</option><option value="已下线">已下线</option>';
+    else if (field === 'public' || field === 'checkin' || field === 'magic') valSel.innerHTML = '<option value="是">是</option><option value="否">否</option>';
+    else if (field === 'speed') valSel.innerHTML = '<option value="快">快</option><option value="一般">一般</option><option value="慢">慢</option>';
+    else if (field === 'stars') valSel.innerHTML = [5,4,3,2,1].map(s => `<option value="${s}">${s}星</option>`).join('');
+    else if (field === 'official') valSel.innerHTML = '<option value="官方直营">官方直营</option><option value="第三方中转">第三方中转</option>';
+    else if (field === 'fee') valSel.innerHTML = '<option value="">不填</option><option value="免费">免费</option><option value="低">低</option><option value="中">中</option><option value="高">高</option>';
+    else if (field === 'reg_status') valSel.innerHTML = '<option value="开放注册中">开放注册中</option><option value="限时开放">限时开放</option><option value="暂不开放">暂不开放</option>';
+}
+
+async function applyBatchModify() {
+    if (blockList.includes(getNickname())) { showToast('你已被拉黑，无法批量修改。'); return; }
+    if (selectedModifyIds.size === 0) { showToast('请至少选择一个站子（通过列表中的复选框）'); return; }
+    const field = document.getElementById('batchField').value;
+    const value = document.getElementById('batchValue').value;
+    const fieldMap = { reg_status: 'reg_status' };
+    const dbField = fieldMap[field] || field;
+
+    // 批量标记失效时提醒
+    if (dbField === 'status' && value === '失效') {
+        showToast('注意哦，批量标记失效后，如果被纠错超过3次，会失去维护名额呢。');
+    }
+
+    for (const id of selectedModifyIds) {
+        const { data: item } = await supa.from('sites').select(dbField).eq('id', id).single();
+        const oldVal = item ? (item[dbField] || '') : '';
+        await supa.from('sites').update({ [dbField]: value, updated_at: new Date().toISOString() }).eq('id', id);
+        if (String(oldVal) !== String(value)) {
+            await supa.from('update_logs').insert([{
+                site_id: id, field: dbField, old_value: String(oldVal), new_value: value, nickname: getNickname() || '匿名'
+            }]);
+            // 如果是标记失效，额外记录
+            if (dbField === 'status' && value === '失效') {
+                await supa.from('update_logs').insert([{
+                    site_id: id, field: '标记失效', old_value: String(oldVal), new_value: '失效', nickname: getNickname() || '匿名'
+                }]);
+            }
+        }
+    }
+    selectedModifyIds.clear();
+    renderModifyList();
+    showToast('批量修改完成！');
+}
+
+// ==================== 失效站子池 ====================
+async function showFailurePool() {
+    const container = document.getElementById('failurePoolContainer');
+    container.style.display = 'block';
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">正在加载失效站子池……</div>';
+
+    const { data: sites } = await supa.from('sites').select('*').eq('status', '失效').order('id', { ascending: false });
+    if (!sites || sites.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">当前没有失效站子，太棒啦~</div>';
+        return;
+    }
+
+    container.innerHTML = sites.map(s => {
+        // 找到标记失效的操作人
+        const markerName = s.inviter || '某个小伙伴';
+        const markerTime = s.updated_at ? new Date(s.updated_at).toLocaleDateString() : '最近';
+        return `
+        <div style="background:#fff; border-radius:14px; padding:12px; border:1px solid #e4efe2; margin-bottom:10px;">
+            <div style="font-size:15px; font-weight:bold; color:#c0392b;">哎呀，这个站子被标记为失效啦。</div>
+            <div style="font-size:13px; color:#4a6f48; margin:4px 0;">名称：${s.name} | 标记时间：${markerTime}</div>
+            <div style="font-size:12px; color:#7a9678;">你觉得这个标记对吗？</div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+                <button class="btn-copy" onclick="openDetailView(${s.id})">查看详情</button>
+                <button class="btn-copy" style="background:#4a6f48; color:#fff;" onclick="startCorrect(${s.id})">我要纠错</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
+async function startCorrect(siteId) {
+    const container = document.getElementById('failurePoolContainer');
+    container.innerHTML = `
+        <div class="panel-header"><span class="btn-back" onclick="showFailurePool()">← 返回失效池</span><span class="panel-title">我要纠错</span></div>
+        <div style="background:#fff; border-radius:14px; padding:15px; border:1px solid #d9e8d7;">
+            <div style="font-size:15px; color:#4a6f48; margin-bottom:15px;">请你选择纠错原因哦：</div>
+            <div style="margin-bottom:10px;">
+                <label style="display:block; padding:8px; border:2px solid #d9e8d7; border-radius:8px; margin-bottom:6px; cursor:pointer;">
+                    <input type="radio" name="correctReason" value="running" checked onchange="toggleCorrectReason()"> 这个站子明明还在正常运行呀（可能需要特殊网络）
+                </label>
+                <label style="display:block; padding:8px; border:2px solid #d9e8d7; border-radius:8px; margin-bottom:6px; cursor:pointer;">
+                    <input type="radio" name="correctReason" value="newUrl" onchange="toggleCorrectReason()"> 这个站子换新网址啦
+                </label>
+                <label style="display:block; padding:8px; border:2px solid #d9e8d7; border-radius:8px; margin-bottom:6px; cursor:pointer;">
+                    <input type="radio" name="correctReason" value="other" onchange="toggleCorrectReason()"> 其他原因（请补充说明一下~）
+                </label>
+            </div>
+            <div id="correctNewUrlArea" style="display:none; margin-bottom:10px;">
+                <label>新的网址（带邀请码的显示链接）</label>
+                <input id="correctNewUrl" placeholder="https://xxx.com/register?aff=xxx">
+            </div>
+            <div id="correctOtherArea" style="display:none; margin-bottom:10px;">
+                <label>补充说明</label>
+                <textarea id="correctOtherNote" rows="2"></textarea>
+            </div>
+            <button class="btn-submit" onclick="submitCorrect(${siteId})">提交纠错</button>
+        </div>
+    `;
+}
+
+function toggleCorrectReason() {
+    const reason = document.querySelector('input[name="correctReason"]:checked').value;
+    document.getElementById('correctNewUrlArea').style.display = reason === 'newUrl' ? 'block' : 'none';
+    document.getElementById('correctOtherArea').style.display = reason === 'other' ? 'block' : 'none';
+}
+
+async function submitCorrect(siteId) {
+    const { data: site } = await supa.from('sites').select('*').eq('id', siteId).single();
+    if (!site) { showToast('站子数据加载失败'); return; }
+
+    const reason = document.querySelector('input[name="correctReason"]:checked').value;
+    const updateObj = { status: '正常', updated_at: new Date().toISOString() };
+    const correctorNick = getNickname() || '匿名';
+    
+    const logEntries = [{
+        site_id: siteId,
+        field: '纠错恢复',
+        old_value: '失效',
+        new_value: '正常',
+        nickname: correctorNick
+    }];
+
+    if (reason === 'newUrl') {
+        const newUrl = document.getElementById('correctNewUrl').value.trim();
+        if (!newUrl) { showToast('请填写新网址哦~'); return; }
+        updateObj.web_url = newUrl;
+        updateObj.url = newUrl;
+        // 48小时缓冲：记录原链接，原维护人可在"我的"面板看到通知
+        await supa.from('update_logs').insert([{
+            site_id: siteId,
+            field: '纠错换网址-48h缓冲',
+            old_value: site.web_url || site.url,
+            new_value: newUrl,
+            nickname: correctorNick
+        }]);
+    } else if (reason === 'other') {
+        const note = document.getElementById('correctOtherNote').value.trim();
+        logEntries[0].new_value = '正常(' + note + ')';
+    }
+
+    const { error } = await supa.from('sites').update(updateObj).eq('id', siteId);
+    if (error) { showToast('纠错失败：' + error.message); return; }
+
+    await supa.from('update_logs').insert(logEntries);
+
+    // 更新纠错人计数
+    if (correctorNick && correctorNick !== '匿名') {
+        const { data: profileData } = await supa.from('profiles').select('correct_count').eq('nickname', correctorNick).limit(1);
+        if (profileData && profileData.length > 0) {
+            const newCount = (profileData[0].correct_count || 0) + 1;
+            await supa.from('profiles').update({ correct_count: newCount }).eq('nickname', correctorNick);
+        }
+    }
+
+    // 更新标记失效者的被纠错计数
+    // 查找最近标记失效的人
+    const { data: markLogs } = await supa.from('update_logs').select('nickname').eq('site_id', siteId).eq('field', '标记失效').order('created_at', { ascending: false }).limit(1);
+    if (markLogs && markLogs.length > 0) {
+        const markerNick = markLogs[0].nickname;
+        if (markerNick && markerNick !== '匿名') {
+            const { data: markerProfile } = await supa.from('profiles').select('wrong_mark_count').eq('nickname', markerNick).limit(1);
+            if (markerProfile && markerProfile.length > 0) {
+                const newWrongCount = (markerProfile[0].wrong_mark_count || 0) + 1;
+                await supa.from('profiles').update({ wrong_mark_count: newWrongCount }).eq('nickname', markerNick);
+            }
+        }
+    }
+
+    showToast('纠错成功！站子已恢复为正常状态~');
+    showFailurePool();
+}
+
+// ==================== 信息维护 ====================
+async function showMaintenance() {
+    const container = document.getElementById('maintenanceContainer');
+    container.style.display = 'block';
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">正在加载信息不完整的站子...</div>';
+
+    const { data: allSites, error } = await supa.from('sites').select('*').order('id', { ascending: false });
+    if (error) {
+        container.innerHTML = `<div style="color:#c0392b;">加载失败：${error.message}</div>`;
+        return;
+    }
+
+    // 过滤完整度<50%且超过72小时保护期
+    const now = new Date();
+    const lowSites = allSites.filter(s => {
+        const pct = calcCompleteness(s);
+        const protectionEnd = s.protection_until ? new Date(s.protection_until) : null;
+        const protectionExpired = !protectionEnd || now > protectionEnd;
+        return pct < 0.5 && protectionExpired;
+    });
+
+    if (lowSites.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#7a9678; padding:20px;">太棒了，所有站子完整度都≥50%或仍在72小时保护期内！暂时没有需要维护的站子。</div>';
+        return;
+    }
+
+    container.innerHTML = `
+        <div style="font-weight:bold; color:#4a6f48; margin-bottom:10px;">共找到 ${lowSites.length} 个完整度低于50%且已过保护期的站子（点击开始维护，补全信息后可替换为你的邀请链接）</div>
+        ${lowSites.map(s => {
+            const pct = Math.round(calcCompleteness(s) * 100);
+            return `
+            <div class="maintenance-item" onclick="startMaintainSite(${s.id})">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:bold; color:#365e34;">${s.name}</span>
+                    <span style="font-size:12px; color:#7a9678;">${s.inviter || '未知'} 录入</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+                <div style="font-size:12px; color:#7a9678;">完整度 ${pct}%</div>
+            </div>`;
+        }).join('')}
+    `;
+}
+
+async function startMaintainSite(id) {
+    const { data: site } = await supa.from('sites').select('*').eq('id', id).single();
+    if (!site) return;
+
+    const now = new Date();
+    const protectionEnd = site.protection_until ? new Date(site.protection_until) : null;
+    if (protectionEnd && now <= protectionEnd) {
+        showToast('该站子仍在72小时保护期内，暂时不能维护哦~');
+        showMaintenance();
+        return;
+    }
+    if (calcCompleteness(site) >= 0.5) {
+        showToast('该站子当前完整度已达标，不能重复维护。');
+        showMaintenance();
+        return;
+    }
+
+    const nickname = getNickname();
+    if (!nickname) { showToast('请先在"我的"面板登录后再来维护哦~'); return; }
+
+    // 检查维护名额
+    const { data: profileData } = await supa.from('profiles').select('*').eq('nickname', nickname).limit(1);
+    const profile = profileData && profileData.length > 0 ? profileData[0] : null;
+    if (profile) {
+        const { data: myMaintain } = await supa.from('sites').select('id').eq('maintainer', profile.id);
+        const myMaintainCount = myMaintain ? myMaintain.length : 0;
+        const { data: mySites } = await supa.from('sites').select('*').eq('inviter', nickname);
+        const validEntries = mySites ? mySites.filter(s => calcCompleteness(s) >= 0.5).length : 0;
+        const correctBonus = Math.floor((profile.correct_count || 0) / 3);
+        const wrongPenalty = Math.floor((profile.wrong_mark_count || 0) / 3);
+        const totalQuota = Math.max(-10, 10 + validEntries * 5 + correctBonus - wrongPenalty);
+        if (myMaintainCount >= totalQuota) {
+            showToast(`你的维护名额已用完（${myMaintainCount}/${totalQuota}），请先录入更多站子或纠错失效站子来获取名额~`);
+            return;
+        }
+    }
+
+    // 检查30天内是否已被维护过
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentLogs } = await supa.from('update_logs').select('*').eq('site_id', id).eq('field', '维护替换链接').gte('created_at', thirtyDaysAgo);
+    if (recentLogs && recentLogs.length > 0) {
+        showToast('该站子在30天内已被维护过，请等待冷却期结束后再来哦~');
+        return;
+    }
+
+    const container = document.getElementById('maintenanceContainer');
+    container.innerHTML = `
+        <div class="panel-header"><span class="btn-back" onclick="showMaintenance()">← 返回列表</span><span class="panel-title">完善信息：${site.name}</span></div>
+        <div style="background:#fff; padding:15px; border-radius:14px; border:1px solid #d9e8d7;">
+            <p style="font-size:13px; color:#7a9678; margin-bottom:10px;">以下字段为当前缺失或可补充的信息，填完后在底部输入你的新网址，提交后该站子的链接将更新为你提供的地址。</p>
+            <div class="form-group"><label>速度</label><select id="mSpeed">${['','快','一般','慢'].map(v => `<option value="${v}" ${(site.speed||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>公益</label><select id="mPublic">${['','是','否'].map(v => `<option value="${v}" ${(site.public||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>签到</label><select id="mCheckin">${['','是','否'].map(v => `<option value="${v}" ${(site.checkin||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>特殊网络</label><select id="mMagic">${['','是','否'].map(v => `<option value="${v}" ${(site.magic||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>推荐指数</label><select id="mStars">${['',5,4,3,2,1].map(s => `<option value="${s}" ${(site.stars||'')==s?'selected':''}>${s||'不填'}${s?'星':''}</option>`).join('')}</select></div>
+            <div class="form-group"><label>状态</label><select id="mStatus">${['','正常','失效','已下线'].map(v => `<option value="${v}" ${(site.status||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>类型</label><select id="mOfficial">${['','官方直营','第三方中转'].map(v => `<option value="${v}" ${(site.official||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>费率</label><select id="mFee">${['','免费','低','中','高'].map(v => `<option value="${v}" ${(site.fee||'')===v?'selected':''}>${v||'不填'}</option>`).join('')}</select></div>
+            <div class="form-group"><label>注册状态</label><input id="mRegStatus" value="${site.reg_status || ''}"></div>
+            <div class="form-group"><label>试吃福利</label><input id="mTrial" value="${site.trial || ''}"></div>
+            <div class="form-group"><label>联系方式</label><input id="mContact" value="${site.contact || ''}"></div>
+            <div class="form-group"><label>邀请人</label><input id="mInviter" value="${site.inviter || ''}"></div>
+            <div class="form-group"><label>备注</label><textarea id="mNote" rows="2">${site.note || ''}</textarea></div>
+            <hr style="border:1px dashed #d9e8d7; margin:15px 0;">
+            <div class="form-group"><label>★ 你的新 API 地址</label><input id="mNewUrl" placeholder="https://api.yoursite.com/v1"></div>
+            <div class="form-group"><label>★ 你的新显示链接</label><input id="mNewWebUrl" placeholder="https://yoursite.com"></div>
+            <button class="btn-submit" onclick="submitMaintenance(${site.id})">确认替换并更新信息</button>
+        </div>
+    `;
+}
+
+async function submitMaintenance(id) {
+    const { data: site } = await supa.from('sites').select('*').eq('id', id).single();
+    if (!site || calcCompleteness(site) >= 0.5) {
+        const now = new Date();
+        const protectionEnd = site.protection_until ? new Date(site.protection_until) : null;
+        if (protectionEnd && now <= protectionEnd) {
+            showToast('该站子仍在72小时保护期内，暂时不能维护哦~');
+            showMaintenance();
+            return;
+        }
+        showToast('该站子当前完整度已达标，不能重复维护。');
+        showMaintenance();
+        return;
+    }
+
+    const nickname = getNickname() || document.getElementById('mInviter').value || '匿名';
+    const userId = myProfile ? myProfile.id : null;
+
+    // 检查维护名额
+    const { data: profileData } = await supa.from('profiles').select('*').eq('nickname', nickname).limit(1);
+    if (profileData && profileData.length > 0) {
+        const profile = profileData[0];
+        const { data: myMaintain } = await supa.from('sites').select('id').eq('maintainer', profile.id);
+        const myMaintainCount = myMaintain ? myMaintain.length : 0;
+        const { data: mySites } = await supa.from('sites').select('*').eq('inviter', nickname);
+        const validEntries = mySites ? mySites.filter(s => calcCompleteness(s) >= 0.5).length : 0;
+        const correctBonus = Math.floor((profile.correct_count || 0) / 3);
+        const wrongPenalty = Math.floor((profile.wrong_mark_count || 0) / 3);
+        const totalQuota = Math.max(-10, 10 + validEntries * 5 + correctBonus - wrongPenalty);
+        if (myMaintainCount >= totalQuota) {
+            showToast('你的维护名额已用完，无法继续维护新站子~');
+            return;
+        }
+    }
+
+    const newUrl = document.getElementById('mNewUrl').value.trim();
+    const newWebUrl = document.getElementById('mNewWebUrl').value.trim();
+    if (!newUrl || !newWebUrl) { showToast('必须填写新的 API 地址和显示链接！'); return; }
+
+    const updateObj = {
+        speed: document.getElementById('mSpeed').value || '一般',
+        public: document.getElementById('mPublic').value || '否',
+        checkin: document.getElementById('mCheckin').value || '否',
+        magic: document.getElementById('mMagic').value || '否',
+        stars: document.getElementById('mStars').value ? parseInt(document.getElementById('mStars').value) : null,
+        status: document.getElementById('mStatus').value || '正常',
+        official: document.getElementById('mOfficial').value || '',
+        fee: document.getElementById('mFee').value || '',
+        reg_status: document.getElementById('mRegStatus').value || '',
+        trial: document.getElementById('mTrial').value || '',
+        contact: document.getElementById('mContact').value || '',
+        inviter: document.getElementById('mInviter').value || nickname,
+        note: document.getElementById('mNote').value || '',
+        url: newUrl,
+        web_url: newWebUrl,
+        maintainer: userId,
+        maintainer_since: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supa.from('sites').update(updateObj).eq('id', id);
+    if (error) { showToast('更新失败：' + error.message); return; }
+
+    await supa.from('update_logs').insert([{
+        site_id: id, field: '维护替换链接', old_value: site.url, new_value: newUrl, nickname
+    }]);
+
+    showToast('维护成功！信息已补全，链接已替换。');
+    showMaintenance();
+}
+    // ==================== 删除面板 ====================
+    async function verifyAdminForDelete() {
+        const pw = document.getElementById('deleteAdminPassword').value;
+        if (!pw) { showToast('请输入管理员密码！'); return; }
+        const ok = await verifyAdminPw(pw);
+        if (ok) {
+            localStorage.setItem('momo_admin_token', 'local_admin');
+            document.getElementById('deleteContent').style.display = 'block';
+            deletePage = 0; selectedDeleteIds.clear();
+            renderDeleteList();
+        } else { showToast('密码错误或无管理员权限！'); }
+    }
+
+    async function renderDeleteList(resetPage = true) {
+        if (resetPage) deletePage = 0;
+        const container = document.getElementById('deleteListContainer');
+        const keyword = document.getElementById('deleteSearchInput').value.toLowerCase();
+        let query = supa.from('sites').select('*').count('exact');
+        if (keyword) query = query.or(`name.ilike.%${keyword}%,url.ilike.%${keyword}%`);
+        query = query.order('id', { ascending: false }).limit(PAGE_SIZE).offset(deletePage * PAGE_SIZE);
+        const { data, count } = await query;
+        deleteTotal = count || (data ? data.length : 0);
+        container.innerHTML = (data || []).map(item => `
+            <div class="data-item">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" class="delete-check" value="${item.id}" ${selectedDeleteIds.has(item.id) ? 'checked' : ''} onchange="onDeleteCheckChange()" onclick="event.stopPropagation();">
+                    <div style="flex:1;">
+                        <h4>${item.name}</h4>
+                        <div style="font-size:12px;">${item.url}</div>
+                    </div>
+                    <button class="btn-copy" style="background:#c0392b; color:#fff;" onclick="deleteSite(${item.id})">删除</button>
+                </div>
+            </div>
+        `).join('');
+        renderDeletePagination();
+        document.getElementById('deleteSelectAll').checked = false;
+    }
+
+    function renderDeletePagination() {
+        const totalPages = Math.ceil(deleteTotal / PAGE_SIZE);
+        document.getElementById('deletePagination').innerHTML = `
+            <button onclick="deletePage=0;renderDeleteList(false)" ${deletePage===0?'disabled':''}>首页</button>
+            <button onclick="deletePage--;renderDeleteList(false)" ${deletePage===0?'disabled':''}>上一页</button>
+            <span class="page-info">第 ${deletePage+1} 页 / 共 ${Math.max(totalPages,1)} 页（${deleteTotal}条）</span>
+            <button onclick="deletePage++;renderDeleteList(false)" ${deletePage>=totalPages-1?'disabled':''}>下一页</button>
+            <button onclick="deletePage=${totalPages-1};renderDeleteList(false)" ${deletePage>=totalPages-1?'disabled':''}>末页</button>
+        `;
+    }
+
+    function toggleDeleteSelectAll() {
+        const checked = document.getElementById('deleteSelectAll').checked;
+        document.querySelectorAll('.delete-check').forEach(cb => {
+            cb.checked = checked;
+            if (checked) selectedDeleteIds.add(parseInt(cb.value));
+            else selectedDeleteIds.delete(parseInt(cb.value));
+        });
+    }
+
+    function onDeleteCheckChange() {
+        document.querySelectorAll('.delete-check').forEach(cb => {
+            if (cb.checked) selectedDeleteIds.add(parseInt(cb.value));
+            else selectedDeleteIds.delete(parseInt(cb.value));
+        });
+        const allChecked = document.querySelectorAll('.delete-check').length > 0 && document.querySelectorAll('.delete-check:checked').length === document.querySelectorAll('.delete-check').length;
+        document.getElementById('deleteSelectAll').checked = allChecked;
+    }
+
+    async function deleteSite(id) {
+        if (!confirm('确定要删除这个站子吗？此操作不可恢复！')) return;
+        const { error } = await supa.from('sites').delete().eq('id', id);
+        if (error) showToast('删除失败：' + error.message);
+        else { renderDeleteList(false); showToast('已删除'); }
+    }
+
+    async function deleteUserModifications() {
+        const name = document.getElementById('deleteUserName').value.trim();
+        if (!name) { showToast('请输入用户名'); return; }
+        const { error } = await supa.from('update_logs').delete().eq('nickname', name);
+        if (error) showToast('删除失败：' + error.message);
+        else showToast(`已清除 ${name} 的所有修改记录。`);
+    }
+
+    function adminManage(action, name, okMsg) {
+        if (!name) return;
+        if (action === 'add' && !adminList.includes(name)) adminList.push(name);
+        else if (action === 'remove') adminList = adminList.filter(a => a !== name);
+        else if (action === 'block' && !blockList.includes(name)) blockList.push(name);
+        else if (action === 'unblock') blockList = blockList.filter(a => a !== name);
+        showToast(okMsg);
+    }
+
+    function addAdmin() {
+        adminManage('add', document.getElementById('newAdminName').value.trim(), '操作完成。');
+    }
+
+    function removeAdmin() {
+        const name = document.getElementById('removeAdminName').value.trim();
+        if (name === 'momo') { showToast('不能移除创建者。'); return; }
+        adminManage('remove', name, `${name} 已被移除管理员。`);
+    }
+
+    function blockUser() {
+        adminManage('block', document.getElementById('blockUserName').value.trim(), '操作完成。');
+    }
+
+    function unblockUser() {
+        adminManage('unblock', document.getElementById('unblockUserName').value.trim(), '操作完成。');
+    }
+
+    async function batchImportData() {
+        const jsonStr = document.getElementById('batchImportJson').value.trim();
+        if (!jsonStr) return;
+        try {
+            const imported = JSON.parse(jsonStr);
+            if (!Array.isArray(imported)) throw new Error('必须是数组');
+            const toInsert = [];
+            for (const item of imported) {
+                if (!item.name || !item.url) continue;
+                const { data: existing } = await supa.from('sites').select('id').eq('web_url', item.web_url || item.url).limit(1);
+                if (existing && existing.length > 0) continue;
+                toInsert.push({
+                    id: Date.now() + Math.random(), name: item.name, models: item.models || '', vendors: item.vendors || '',
+                    url: item.url, web_url: item.web_url || item.url, speed: item.speed || '一般', public: item.public || '否',
+                    checkin: item.checkin || '否', magic: item.magic || '否', stars: item.stars || 3, status: item.status || '正常',
+                    official: item.official || '', fee: item.fee || '', reg_status: item.reg_status || '', trial: item.trial || '',
+                    contact: item.contact || '', inviter: item.inviter || getNickname() || '批量导入', note: item.note || ''
+                });
+            }
+            if (toInsert.length === 0) { showToast('没有可导入的新数据。'); return; }
+            const { error } = await supa.from('sites').insert(toInsert);
+            if (error) { showToast('导入失败：' + error.message); return; }
+            showToast(`成功导入 ${toInsert.length} 个站子。`);
+            document.getElementById('batchImportJson').value = '';
+            renderDeleteList();
+        } catch (e) { showToast('JSON格式错误，请检查。'); }
+    }
+
+   // ==================== 我的面板（重写版，ID+密码登录） ====================
+let myProfile = null;
+let myAvatarTemp = null;
+
+async function myInit() {
+    localStorage.removeItem('momo_token');
+    localStorage.removeItem('momo_user_pw');
+    const savedId = localStorage.getItem('momo_user_id');
+    if (savedId) {
+        const { data } = await supa.from('profiles').select('*').eq('id', parseInt(savedId)).single();
+        if (data) {
+            myProfile = data;
+            localStorage.setItem('momo_nickname', data.nickname);
+        } else {
+            localStorage.removeItem('momo_user_id');
+            localStorage.removeItem('momo_nickname');
+        }
+    }
+    refreshAdminStatus();
+    refreshBlockList();
+}
+myInit();
+
+function loadMyPage() {
+    if (myProfile && myProfile.id) {
+        renderMyProfileView();
+        myLoadProfileData();
+    } else {
+        renderMyAuthView();
+    }
+}
+
+function renderMyAuthView() {
+    const container = document.getElementById('myContent');
+    container.innerHTML = `
+        <div style="background:#fff; border-radius:16px; padding:18px; border:1px solid #e4efe2; max-width:420px; margin:0 auto;">
+            <div id="myRegisterForm">
+                <div class="form-group"><label>昵称</label><input id="myRegNickname" placeholder="输入你的昵称"></div>
+                <div class="form-group"><label>密码</label><input type="password" id="myRegPassword" placeholder="设置一个密码（至少4位）"></div>
+                <div class="form-group"><label>确认密码</label><input type="password" id="myRegPassword2" placeholder="再输入一次密码"></div>
+                <button class="btn-submit" onclick="myRegister()">注册</button>
+            </div>
+            <div id="myLoginForm" style="display:none;">
+                <div class="form-group"><label>用户ID</label><input id="myLoginId" placeholder="输入你的ID号"></div>
+                <div class="form-group"><label>密码</label><input type="password" id="myLoginPassword" placeholder="输入你的密码"></div>
+                <button class="btn-submit" onclick="myLogin()">登录</button>
+            </div>
+            <div style="text-align:center; margin-top:12px; font-size:13px; color:#7a9678;">
+                <span id="mySwitchPrompt">已有账号？</span> <a style="color:#4a6f48; font-weight:bold; cursor:pointer; text-decoration:underline;" onclick="myToggleAuthMode()" id="mySwitchLink">去登录</a>
+            </div>
+        </div>
+    `;
+}
+
+function renderMyProfileView() {
+    const container = document.getElementById('myContent');
+    container.innerHTML = `
+        <div style="background:#fff; border-radius:16px; padding:15px; border:1px solid #e4efe2;">
+            <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
+                <div id="myAvatarArea" style="width:80px; height:80px; border-radius:50%; background:#d3e4d0; border:3px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.08); overflow:hidden; cursor:pointer; flex-shrink:0;" onclick="document.getElementById('myAvatarUpload').click()">
+                    <img id="myAvatarImg" src="" alt="头像" style="width:100%; height:100%; object-fit:cover; display:none;">
+                    <div id="myAvatarPlaceholder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:32px; color:#fff;">?</div>
+                    <input type="file" id="myAvatarUpload" accept="image/*" style="display:none" onchange="myPreviewAvatar(this)">
+                </div>
+                <div style="flex:1;">
+                    <div style="font-size:20px; font-weight:bold; color:#365e34;" id="myProfileName">-</div>
+                    <div style="font-size:13px; color:#7a9678;">ID：<span id="myProfileId">-</span></div>
+                    <div style="font-size:15px; font-weight:bold; color:#f5a623; margin-top:2px;" id="myProfileTitle">-</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:1; background:#f4f9f2; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:22px; font-weight:bold; color:#365e34; cursor:pointer; text-decoration:underline;" id="mySitesCount" onclick="showMyCreatedSites()">0</div>
+                    <div style="font-size:11px; color:#7a9678;">创建的站子（点击查看）</div>
+                </div>
+                <div style="flex:1; background:#f4f9f2; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:22px; font-weight:bold; color:#365e34; cursor:pointer; text-decoration:underline;" id="myMaintainCount" onclick="showMyMaintainedSites()">0</div>
+                    <div style="font-size:11px; color:#7a9678;">维护的站子（点击查看）</div>
+                </div>
+                <div style="flex:1; background:#f4f9f2; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:22px; font-weight:bold; color:#365e34; cursor:pointer; text-decoration:underline;" id="myFavCount" onclick="showMyFavorites()">0</div>
+                    <div style="font-size:11px; color:#7a9678;">收藏（点击查看）</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:1; background:#fff3cd; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:18px; font-weight:bold; color:#856404;" id="myCorrectCount">0</div>
+                    <div style="font-size:11px; color:#856404;">成功纠错</div>
+                </div>
+                <div style="flex:1; background:#fce4ec; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:18px; font-weight:bold; color:#c0392b;" id="myWrongMarkCount">0</div>
+                    <div style="font-size:11px; color:#c0392b;">被纠错次数</div>
+                </div>
+                <div style="flex:1; background:#e8f5e9; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:18px; font-weight:bold; color:#2e7d32;" id="myQuotaInfo">-</div>
+                    <div style="font-size:11px; color:#2e7d32;">维护名额</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>签名</label>
+                <div style="display:flex; gap:8px;">
+                    <input id="mySignature" placeholder="写一句个性签名..." style="flex:1;">
+                    <button class="btn-copy" onclick="mySaveField('signature')">保存</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>我的评论</label>
+                <div style="display:flex; gap:8px;">
+                    <input id="myComment" placeholder="一句话介绍自己..." style="flex:1;">
+                    <button class="btn-copy" onclick="mySaveField('comment')">保存</button>
+                </div>
+            </div>
+
+            <div id="my48hNotice" style="display:none; background:#fff3cd; border-radius:10px; padding:10px; margin-top:10px;"></div>
+
+            <div style="margin-top:15px; font-weight:bold; color:#4a6f48; cursor:pointer;" onclick="showMyPosts()">我发布的帖子 →</div>
+            <div style="margin-top:8px; font-weight:bold; color:#4a6f48; cursor:pointer;" onclick="showAchievementSystem()">查看成就系统 →</div>
+            <div id="myAchievementArea" style="display:block; margin-top:10px;"></div>
+
+            <button class="btn-copy" style="background:#c0392b; color:#fff; width:100%; margin-top:15px;" onclick="myLogout()">退出登录</button>
+        </div>
+    `;
+}
+
+function myToggleAuthMode() {
+    const regForm = document.getElementById('myRegisterForm');
+    const loginForm = document.getElementById('myLoginForm');
+    if (regForm.style.display === 'none') {
+        regForm.style.display = 'block'; loginForm.style.display = 'none';
+        document.getElementById('mySwitchPrompt').textContent = '已有账号？';
+        document.getElementById('mySwitchLink').textContent = '去登录';
+    } else {
+        regForm.style.display = 'none'; loginForm.style.display = 'block';
+        document.getElementById('mySwitchPrompt').textContent = '没有账号？';
+        document.getElementById('mySwitchLink').textContent = '去注册';
+    }
+}
+
+async function myRegister() {
+    const nickname = document.getElementById('myRegNickname').value.trim();
+    const password = document.getElementById('myRegPassword').value;
+    const password2 = document.getElementById('myRegPassword2').value;
+
+    if (!nickname) { showToast('请输入昵称'); return; }
+    if (!password || password.length < 4) { showToast('密码至少需要4位哦~'); return; }
+    if (password !== password2) { showToast('两次输入的密码不一致，请检查一下~'); return; }
+
+    // 查重（直连 profiles 表）
+    const { data: dup } = await supa.from('profiles').select('id').eq('nickname', nickname).limit(1);
+    if (dup && dup.length > 0) { showToast('该昵称已被使用'); return; }
+
+    const uid = Date.now() % 2000000000;
+    const rec = {
+        id: uid, nickname,
+        password: await sha256Pw(password),
+        avatar_url: '', banner_url: '', signature: '与君初相识，犹如故人归。',
+        comment: '', title: '新手上路', correct_count: 0, wrong_mark_count: 0
+    };
+    const { error } = await supa.from('profiles').insert([rec]);
+    if (error) { showToast('注册失败：' + error.message); return; }
+
+    myProfile = rec;
+    localStorage.setItem('momo_nickname', nickname);
+    localStorage.setItem('momo_user_id', String(uid));
+    localStorage.removeItem('momo_user_pw');
+    myAvatarTemp = null;
+    renderMyProfileView();
+    await myLoadProfileData();
+    showToast('注册成功！请牢记你的ID号：' + uid + '，以后用它和密码登录哦~');
+}
+
+async function myLogin() {
+    const idStr = document.getElementById('myLoginId').value.trim();
+    const password = document.getElementById('myLoginPassword').value;
+
+    if (!idStr) { showToast('请输入你的ID号'); return; }
+    if (!password) { showToast('请输入密码'); return; }
+
+    const id = parseInt(idStr);
+    if (isNaN(id)) { showToast('ID号是纯数字哦，请检查一下~'); return; }
+
+    const { data: users } = await supa.from('profiles').select('*').eq('id', id).limit(1);
+    if (!users || users.length === 0) { showToast('该ID号不存在，请先注册或检查ID是否正确~'); return; }
+    const ok = await verifyLocalPw(password, users[0].password);
+    if (!ok) { showToast('密码错误，请重新输入~'); return; }
+    if (!String(users[0].password).startsWith('sha256$')) {
+        const newPw = await sha256Pw(password);
+        await supa.from('profiles').update({ password: newPw }).eq('id', id);
+        users[0].password = newPw;
+    }
+
+    myProfile = users[0];
+    localStorage.setItem('momo_nickname', myProfile.nickname);
+    localStorage.setItem('momo_user_id', String(myProfile.id));
+    localStorage.removeItem('momo_user_pw');
+    myAvatarTemp = null;
+    renderMyProfileView();
+    await myLoadProfileData();
+    showToast('登录成功，欢迎回来，' + myProfile.nickname + '~');
+}
+
+async function myLogout() {
+    localStorage.removeItem('momo_user_id');
+    localStorage.removeItem('momo_user_pw');
+    localStorage.removeItem('momo_nickname');
+    localStorage.removeItem('momo_token');
+    localStorage.removeItem('momo_admin_token');
+    myProfile = null;
+    myAvatarTemp = null;
+    renderMyAuthView();
+    showToast('已退出登录');
+    refreshAdminStatus();
+}
+
+async function myLoadProfileData() {
+    if (!myProfile || !myProfile.id) return;
+    const userId = myProfile.id;
+    const nick = myProfile.nickname;
+
+    const { data: profiles } = await supa.from('profiles').select('*').eq('id', userId).limit(1);
+    if (profiles && profiles.length > 0) {
+        myProfile = profiles[0];
+        localStorage.setItem('momo_nickname', myProfile.nickname);
+    }
+
+    document.getElementById('myProfileName').textContent = myProfile.nickname || '-';
+    document.getElementById('myProfileId').textContent = myProfile.id || '-';
+    document.getElementById('mySignature').value = myProfile.signature || '';
+    document.getElementById('myComment').value = myProfile.comment || '';
+    document.getElementById('myCorrectCount').textContent = myProfile.correct_count || 0;
+    document.getElementById('myWrongMarkCount').textContent = myProfile.wrong_mark_count || 0;
+
+    const avatarImg = document.getElementById('myAvatarImg');
+    const avatarPlaceholder = document.getElementById('myAvatarPlaceholder');
+    if (myAvatarTemp) {
+        avatarImg.src = myAvatarTemp; avatarImg.style.display = 'block'; avatarPlaceholder.style.display = 'none';
+    } else if (myProfile.avatar_url) {
+        avatarImg.src = myProfile.avatar_url; avatarImg.style.display = 'block'; avatarPlaceholder.style.display = 'none';
+    } else {
+        avatarImg.style.display = 'none'; avatarPlaceholder.style.display = 'flex';
+    }
+
+    const { data: mySites } = await supa.from('sites').select('*').eq('inviter', nick);
+    const { data: myMaintain } = await supa.from('sites').select('*').eq('maintainer', userId);
+    const mySitesCount = mySites ? mySites.length : 0;
+    const myMaintainCount = myMaintain ? myMaintain.length : 0;
+
+    document.getElementById('mySitesCount').textContent = mySitesCount;
+    document.getElementById('myMaintainCount').textContent = myMaintainCount;
+    document.getElementById('myFavCount').textContent = favorites.length;
+
+    // 维护名额计算
+    const baseQuota = 10;
+    const validEntries = mySites ? mySites.filter(s => calcCompleteness(s) >= 0.5).length : 0;
+    const correctBonus = Math.floor((myProfile.correct_count || 0) / 3);
+    const wrongPenalty = Math.floor((myProfile.wrong_mark_count || 0) / 3);
+    const totalQuota = Math.max(-10, baseQuota + validEntries * 5 + correctBonus - wrongPenalty);
+    document.getElementById('myQuotaInfo').textContent = `${myMaintainCount} / ${totalQuota}`;
+    if (typeof renderAchievementContent === 'function') renderAchievementContent();
+
+    // 称号
+    var titles = [];
+    if (validEntries >= 1) titles.push('初级录入员');
+    if (validEntries >= 5) titles.push('站子收集者');
+    if (validEntries >= 15) titles.push('API探险家');
+    if (validEntries >= 30) titles.push('模型猎手');
+    if (myProfile.vendor_title && totalQuota >= 20) titles.push(myProfile.vendor_title);
+    if (myProfile.custom_title && totalQuota >= 52) titles.push(myProfile.custom_title);
+    if (titles.length === 0) titles.push('新手上路');
+    document.getElementById('myProfileTitle').textContent = titles.join(' | ');
+
+    // 48小时纠错通知
+    const { data: bufferLogs } = await supa.from('update_logs').select('*').eq('field', '纠错换网址-48h缓冲').order('created_at', { ascending: false });
+    const noticeEl = document.getElementById('my48hNotice');
+    if (bufferLogs && bufferLogs.length > 0) {
+        const recent = bufferLogs.filter(l => (new Date() - new Date(l.created_at)) < 48 * 60 * 60 * 1000);
+        if (recent.length > 0) {
+            noticeEl.style.display = 'block';
+            noticeEl.innerHTML = `<div style="font-weight:bold; margin-bottom:5px;">有站子的链接被更换了：</div>`;
+            recent.forEach(l => {
+                noticeEl.innerHTML += `<div style="font-size:13px; margin:4px 0;">站子ID ${l.site_id} 被更换了链接，<button class="btn-copy" style="background:#c0392b; color:#fff;" onclick="revertUrl(${l.site_id}, '${(l.old_value || '').replace(/'/g, "\\'")}')">点此换回</button></div>`;
+            });
+        }
+    }
+}
+
+async function revertUrl(siteId, oldUrl) {
+    await supa.from('sites').update({ web_url: oldUrl, url: oldUrl, updated_at: new Date().toISOString() }).eq('id', siteId);
+    showToast('链接已换回！');
+    myLoadProfileData();
+}
+
+function showAchievementSystem() {
+    const area = document.getElementById('myAchievementArea');
+    if (area.style.display === 'block') { area.style.display = 'none'; return; }
+    area.style.display = 'block';
+    if (typeof renderAchievementContent === 'function') renderAchievementContent();
+}
+
+function renderAchievementContent() {
+    const area = document.getElementById('myAchievementArea');
+    if (!area || area.style.display !== 'block') return;
+    const validEntries = parseInt(document.getElementById('mySitesCount').textContent) || 0;
+    const quotaStr = document.getElementById('myQuotaInfo').textContent;
+    const quota = parseInt(quotaStr.split('/')[1]) || 0;
+    area.innerHTML = `
+        <div style="background:#f4f9f2; border-radius:12px; padding:12px; margin-top:10px;">
+            <div style="font-weight:bold; color:#365e34; margin-bottom:10px;">基础称号</div>
+            <div>初级录入员（需录入1个）${validEntries>=1?'已完成~':''}</div>
+            <div>站子收集者（需录入5个）${validEntries>=5?'已完成~':''}</div>
+            <div>API探险家（需录入15个）${validEntries>=15?'已完成~':''}</div>
+            <div>模型猎手（需录入30个）${validEntries>=30?'已完成~':''}</div>
+            <div style="font-weight:bold; color:#365e34; margin-top:10px;">厂商称号（需维护名额≥20）${quota>=20?'已完成~':'（当前'+quota+'/20）'}</div>
+            <select id="vendorTitleSelect" style="margin-top:5px; padding:5px; border:1px solid #d9e8d7; border-radius:6px; width:100%;" ${quota<20?'disabled':''}>
+                <option value="">选择你喜欢的厂商</option>
+                ${VENDOR_LIST.map(v => `<option value="${v}" ${myProfile && myProfile.vendor_title===v?'selected':''}>${v}</option>`).join('')}
+            </select>
+            <button class="btn-copy" onclick="saveVendorTitle()" style="margin-top:5px;" ${quota<20?'disabled':''}>保存厂商称号</button>
+            <div style="font-weight:bold; color:#365e34; margin-top:10px;">自定义称号（需维护名额≥52）${quota>=52?'已完成~':'（当前'+quota+'/52）'}</div>
+            <input id="customTitleInput" placeholder="输入自定义文字（最多12字）" value="${myProfile ? myProfile.custom_title || '' : ''}" style="width:100%; margin-top:5px; padding:5px; border:1px solid #d9e8d7; border-radius:6px;" ${quota<52?'disabled':''}>
+            <button class="btn-copy" onclick="saveCustomTitle()" style="margin-top:5px;" ${quota<52?'disabled':''}>保存自定义称号</button>
+        </div>
+    `;
+}
+
+async function saveVendorTitle() {
+    const val = document.getElementById('vendorTitleSelect').value;
+    if (!val) { showToast('请选择一个厂商~'); return; }
+    await supa.from('profiles').update({ vendor_title: val }).eq('id', myProfile.id);
+    myProfile.vendor_title = val;
+    showToast('厂商称号已保存！');
+    myLoadProfileData();
+}
+
+async function saveCustomTitle() {
+    const val = document.getElementById('customTitleInput').value.trim();
+    if (!val || val.length > 12) { showToast('请输入1-12个字~'); return; }
+    await supa.from('profiles').update({ custom_title: val }).eq('id', myProfile.id);
+    myProfile.custom_title = val;
+    showToast('自定义称号已保存！');
+    myLoadProfileData();
+}
+
+async function mySaveField(field) {
+    if (!myProfile || !myProfile.id) { showToast('请先登录'); return; }
+    let newVal = '';
+    if (field === 'signature') newVal = document.getElementById('mySignature').value.trim();
+    else if (field === 'comment') newVal = document.getElementById('myComment').value.trim();
+    const { error } = await supa.from('profiles').update({ [field]: newVal }).eq('id', myProfile.id);
+    if (error) { showToast('保存失败：' + error.message); return; }
+    myProfile[field] = newVal;
+    showToast('已保存');
+}
+
+function myPreviewAvatar(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 500 * 1024) { showToast('图片太大，请选择小于500KB的图片'); return; }
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        myAvatarTemp = e.target.result;
+        const avatarImg = document.getElementById('myAvatarImg');
+        avatarImg.src = myAvatarTemp;
+        avatarImg.style.display = 'block';
+        document.getElementById('myAvatarPlaceholder').style.display = 'none';
+        if (myProfile && myProfile.id) {
+            showToast('正在保存头像...');
+            const { error } = await supa.from('profiles').update({ avatar_url: myAvatarTemp }).eq('id', myProfile.id);
+            if (error) { showToast('头像保存失败：' + error.message); }
+            else { showToast('头像已保存'); myProfile.avatar_url = myAvatarTemp; }
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+async function showMyCreatedSites() {
+    if (!myProfile || !myProfile.id) { showToast('请先登录'); return; }
+    const nick = myProfile.nickname;
+    const { data: mySites } = await supa.from('sites').select('*').eq('inviter', nick).order('id', { ascending: false });
+    const container = document.getElementById('myContent');
+    if (!mySites || mySites.length === 0) {
+        container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">我创建的站子</span></div><div style="text-align:center; color:#7a9678; padding:30px;">你还没有创建过站子哦~</div>';
+        return;
+    }
+    container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">我创建的站子（' + mySites.length + '）</span></div>';
+    container.innerHTML += (mySites || []).map(item => {
+        const webUrl = item.web_url || item.url;
+        const pct = Math.round(calcCompleteness(item) * 100);
+        return '<div class="data-item"><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;cursor:pointer;" onclick="openDetailView(' + item.id + ')"><h4 style="color:#4a6f48;">' + (item.name||'') + '</h4><div style="font-size:12px;color:#7a9678;">' + (item.web_url||item.url||'') + '</div><div style="font-size:11px;color:#7a9678;">完整度' + pct + '% 结合' + (item.stars||0) + '⭐</div></div></div></div>';
+    }).join('');
+}
+
+async function showMyMaintainedSites() {
+    if (!myProfile || !myProfile.id) { showToast('请先登录'); return; }
+    const { data: myMaintain } = await supa.from('sites').select('*').eq('maintainer', myProfile.id).order('id', { ascending: false });
+    const container = document.getElementById('myContent');
+    if (!myMaintain || myMaintain.length === 0) {
+        container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">维护的站子</span></div><div style="text-align:center; color:#7a9678; padding:30px;">你还没有维护过站子哦~</div>';
+        return;
+    }
+    container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">维护的站子（' + myMaintain.length + '）</span></div>';
+    container.innerHTML += (myMaintain || []).map(function(item) {
+        return '<div class="data-item"><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;cursor:pointer;" onclick="openDetailView(' + item.id + ')"><h4 style="color:#4a6f48;">' + (item.name||'') + '</h4><div style="font-size:12px;color:#7a9678;">' + (item.web_url||item.url||'') + '</div></div></div></div>';
+    }).join('');
+}
+
+async function showMyFavorites() {
+    if (favorites.length === 0) { showToast('还没有收藏哦'); return; }
+    const { data: favSites } = await supa.from('sites').select('*').in('id', favorites).order('id', { ascending: false });
+    const container = document.getElementById('myContent');
+    if (!favSites || favSites.length === 0) {
+        container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">我的收藏</span></div><div style="text-align:center; color:#7a9678; padding:30px;">暂无收藏数据</div>';
+        return;
+    }
+    container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">我的收藏（' + favSites.length + '）</span></div>';
+    container.innerHTML += (favSites || []).map(function(item) {
+        return '<div class="data-item"><div style="display:flex;align-items:center;gap:8px;"><button class="star-btn active" onclick="event.stopPropagation();toggleFavorite(' + item.id + ');showMyFavorites();" style="position:static;">★</button><div style="flex:1;cursor:pointer;" onclick="openDetailView(' + item.id + ')"><h4 style="color:#4a6f48;">' + (item.name||'') + '</h4><div style="font-size:12px;color:#7a9678;">' + (item.web_url||item.url||'') + '</div></div></div></div>';
+    }).join('');
+}
+
+async function showMyPosts() {
+    if (!myProfile) { showToast('请先登录'); return; }
+    const nick = myProfile.nickname;
+    const { data: forumPosts } = await supa.from('forums').select('*').eq('nickname', nick).order('id', { ascending: false });
+    const { data: keyPosts } = await supa.from('keys').select('*').eq('nickname', nick).order('id', { ascending: false });
+    var allPosts = [];
+    (forumPosts||[]).forEach(function(p) { allPosts.push(Object.assign({}, p, {_type:'论坛'})); });
+    (keyPosts||[]).forEach(function(p) { allPosts.push(Object.assign({}, p, {_type:'密钥'})); });
+    allPosts.sort(function(a,b) { return (b.id||0) - (a.id||0); });
+    const container = document.getElementById('myContent');
+    if (allPosts.length === 0) {
+        container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">我发布的帖子</span></div><div style="text-align:center; color:#7a9678; padding:30px;">你还没有发过帖子哦~</div>';
+        return;
+    }
+    container.innerHTML = '<div class="panel-header"><span class="btn-back" onclick="renderMyProfileView();myLoadProfileData();">← 返回</span><span class="panel-title">我发布的帖子（' + allPosts.length + '）</span></div>';
+    container.innerHTML += allPosts.map(function(p) {
+        var content = (p.content||'').substring(0, 80);
+        return '<div class="data-item"><div style="display:flex;align-items:center;gap:8px;"><span class="tag">' + p._type + '</span><div style="flex:1;"><h4 style="color:#4a6f48;">' + (p.site_name||p.category||'帖子') + '</h4><div style="font-size:12px;color:#7a9678;">' + content + '</div></div></div></div>';
+    }).join('');
+}
+
+    // ==================== 反馈论坛（保持不变） ====================
+    async function showForumList(category) {
+        const container = document.getElementById('forumListContainer');
+        const breadcrumb = document.getElementById('forumBreadcrumb');
+        const detail = document.getElementById('forumPostDetail');
+        detail.style.display = 'none'; container.style.display = 'block';
+        if (category) breadcrumb.innerHTML = `反馈论坛 > ${category} <button class="btn-back" onclick="showForumList()">返回全部</button>`;
+        else breadcrumb.innerHTML = '反馈论坛';
+        let query = supa.from('forums').select('*').order('id', { ascending: false });
+        if (category) query = query.eq('category', category);
+        const { data: filtered } = await query;
+        if (!filtered || filtered.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">暂无帖子，快来发第一帖吧！</div>';
+        } else {
+            container.innerHTML = filtered.map(p => `
+                <div class="forum-post" onclick="showForumDetail(${p.id})">
+                    <div class="meta"><span>${p.anonymous ? '匿名' : p.nickname} [${p.category}]</span><span>${new Date(p.created_at).toLocaleString()}</span></div>
+                    <div>${p.content.substring(0, 80)}...</div>
+                    ${p.site_id ? `<div style="font-size:11px; color:#4a6f48;">关联站点：${p.site_name} <button class="expand-btn" onclick="event.stopPropagation(); openDetailView(${p.site_id})">查看</button></div>` : ''}
+                </div>
+            `).join('');
+        }
+        container.innerHTML += `
+            <div style="background:#fcfaf5;padding:12px;border-radius:14px;border:1px dashed #9dbba0;margin-top:15px;">
+                <div class="forum-name-row">
+                    <input id="forumName" placeholder="你的姓名/昵称" value="${getNickname()}" style="flex:1;">
+                    <select id="forumCategory"><option value="体验交流">体验交流</option><option value="求助问答">求助问答</option><option value="灌水">灌水</option></select>
+                </div>
+                <div style="margin-bottom:6px;"><label><input type="checkbox" id="forumAnonymous"> 匿名发布</label></div>
+                <div style="margin-bottom:6px;"><label>关联站点（可选）：</label>
+                    <div class="searchable-select" id="forumSiteSelect">
+                        <input type="text" placeholder="搜索站点..." oninput="filterForumSiteOptions()" onfocus="showForumSiteOptions()" onblur="hideForumSiteOptions()">
+                        <div class="options" id="forumSiteOptions"></div>
+                    </div>
+                </div>
+                <textarea class="forum-input" id="forumContent" placeholder="分享你的使用体验..." rows="3"></textarea>
+                <div><input id="forumPassword" placeholder="设置密码（用于后续修改/删除）" style="width:100%; margin-bottom:6px;"></div>
+                <button class="filter-btn" style="width:100%;" onclick="submitForumPost()">发布帖子</button>
+            </div>
+        `;
+        initForumSiteOptions();
+    }
+
+    async function submitForumPost() {
+        const nickname = document.getElementById('forumName').value.trim() || getNickname() || '匿名';
+        const category = document.getElementById('forumCategory').value;
+        const content = document.getElementById('forumContent').value.trim();
+        const password = document.getElementById('forumPassword').value.trim();
+        const anonymous = document.getElementById('forumAnonymous').checked;
+        const siteInput = document.getElementById('forumSiteSelect').querySelector('input');
+        const site_id = siteInput.getAttribute('data-id') ? parseInt(siteInput.getAttribute('data-id')) : null;
+        const site_name = siteInput.value || '';
+        if (!content) { showToast('内容不能为空！'); return; }
+        const { error } = await supa.from('forums').insert([{ id: Date.now(), nickname, category, content, anonymous, password, site_id, site_name }]);
+        if (error) { showToast('发布失败：' + error.message); return; }
+        document.getElementById('forumContent').value = ''; document.getElementById('forumPassword').value = '';
+        siteInput.value = ''; siteInput.removeAttribute('data-id');
+        showForumList(category);
+    }
+
+    async function showForumDetail(id) {
+        const { data: post } = await supa.from('forums').select('*').eq('id', id).single();
+        if (!post) return;
+        const container = document.getElementById('forumListContainer');
+        const detail = document.getElementById('forumPostDetail');
+        container.style.display = 'none'; detail.style.display = 'block';
+        detail.innerHTML = `
+            <div class="panel-header"><span class="btn-back" onclick="showForumList('${post.category}')">← 返回列表</span><span class="panel-title">帖子详情</span></div>
+            <div class="forum-post">
+                <div class="meta"><span>${post.anonymous ? '匿名' : post.nickname} [${post.category}]</span><span>${new Date(post.created_at).toLocaleString()}</span></div>
+                <div style="white-space:pre-wrap; margin:10px 0;">${post.content}</div>
+                ${post.site_id ? `<div style="font-size:12px; color:#4a6f48;">关联站点：${post.site_name} <button class="expand-btn" onclick="openDetailView(${post.site_id})">查看站子详情</button></div>` : ''}
+            </div>
+            <div id="forumComments" style="margin:10px 0;"></div>
+            <div style="display:flex; gap:6px; margin-top:6px;"><input type="text" id="forumCommentInput" placeholder="写评论..." style="flex:1; padding:4px 8px; border:1px solid #d9e8d7; border-radius:6px;"><button class="btn-copy" onclick="submitForumComment(${post.id})">评论</button></div>
+            <div style="margin-top:10px;"><input id="forumDeletePassword" placeholder="输入密码以删除帖子" style="width:100%; margin-bottom:6px;"><button class="btn-copy" style="background:#c0392b; color:#fff; width:100%;" onclick="deleteForumPost(${post.id})">删除帖子</button></div>
+        `;
+        await renderComments('forum', post.id, 'forumComments');
+    }
+
+    async function submitForumComment(id) {
+        const input = document.getElementById('forumCommentInput'); const text = input.value.trim(); if (!text) return;
+        await supa.from('comments').insert([{ target_type: 'forum', target_id: id, content: text, nickname: getNickname() || '匿名' }]);
+        input.value = ''; await renderComments('forum', id, 'forumComments');
+    }
+
+    async function deleteForumPost(id) {
+        const pw = document.getElementById('forumDeletePassword').value;
+        if (!pw) { showToast('请输入删除密码！'); return; }
+        const { data: post } = await supa.from('forums').select('*').eq('id', id).single();
+        if (!post) { showToast('帖子不存在'); return; }
+        if (String(post.password || '') !== pw) { showToast('密码错误！'); return; }
+        const { error } = await supa.from('forums').delete().eq('id', id);
+        if (error) { showToast('删除失败：' + error.message); return; }
+        showToast('已删除'); showForumList();
+    }
+
+    function initForumSiteOptions() {
+        supa.from('sites').select('id, name').then(({ data }) => {
+            const optsDiv = document.getElementById('forumSiteOptions'); if (!optsDiv) return;
+            optsDiv.innerHTML = (data || []).map(item => `<div data-id="${item.id}" onmousedown="selectForumSite('${item.id}','${item.name}')">${item.name}</div>`).join('');
+        });
+    }
+    function filterForumSiteOptions() {
+        const input = document.getElementById('forumSiteSelect').querySelector('input'); const filter = input.value.toLowerCase();
+        supa.from('sites').select('id, name').ilike('name', `%${filter}%`).then(({ data }) => {
+            const optsDiv = document.getElementById('forumSiteOptions'); optsDiv.innerHTML = (data || []).map(item => `<div data-id="${item.id}" onmousedown="selectForumSite('${item.id}','${item.name}')">${item.name}</div>`).join('');
+        }); showForumSiteOptions();
+    }
+    function showForumSiteOptions() { const el = document.getElementById('forumSiteOptions'); if (el) el.style.display = 'block'; }
+    function hideForumSiteOptions() { setTimeout(() => { const el = document.getElementById('forumSiteOptions'); if (el) el.style.display = 'none'; }, 200); }
+    function selectForumSite(id, name) {
+        const input = document.getElementById('forumSiteSelect').querySelector('input'); input.value = name; input.setAttribute('data-id', id);
+        document.getElementById('forumSiteOptions').style.display = 'none';
+    }
+
+    async function renderComments(targetType, targetId, containerId) {
+        const container = document.getElementById(containerId); if (!container) return;
+        const { data } = await supa.from('comments').select('*').eq('target_type', targetType).eq('target_id', targetId).order('id', { ascending: true });
+        container.innerHTML = (data || []).map((c, i) => `<div class="key-comment-item"><span style="color:#4a6f48;">#${i+1}</span> ${c.nickname}：${c.content} <span style="font-size:10px; color:#999;">${new Date(c.created_at).toLocaleTimeString()}</span></div>`).join('');
+    }
+
+    // ==================== 限时活动（保持不变） ====================
+    async function showActivityList() {
+        const container = document.getElementById('activityListContainer'); const detail = document.getElementById('activityPostDetail');
+        detail.style.display = 'none'; container.style.display = 'block';
+        const { data } = await supa.from('activities').select('*').order('id', { ascending: false });
+        if (!data || data.length === 0) container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">暂无活动</div>';
+        else container.innerHTML = data.map(a => `
+            <div class="activity-post" onclick="showActivityDetail(${a.id})">
+                <div class="title">${a.site_name || '全局公告'}</div><div>${a.content.substring(0, 60)}...</div>
+                <div style="font-size:11px; color:#999;">${a.start_time || ''} ~ ${a.end_time || ''}</div>
+                <button class="btn-copy" style="background:#c0392b; color:#fff; font-size:10px; margin-top:4px;" onclick="event.stopPropagation(); deleteActivity(${a.id})">删除</button>
+            </div>`).join('');
+        container.innerHTML += `
+            <div style="background:#fcfaf5;padding:12px;border-radius:14px;border:1px dashed #9dbba0;margin-top:15px;">
+                <div class="form-group"><label>关联站点（可搜索）</label>
+                    <div class="searchable-select" id="activitySiteSelect"><input type="text" placeholder="搜索站点..." oninput="filterActivitySiteOptions()" onfocus="showActivitySiteOptions()" onblur="hideActivitySiteOptions()"><div class="options" id="activitySiteOptions"></div></div>
+                </div>
+                <div class="form-group"><label>活动网址</label><input id="activityUrl" placeholder="https://..."></div>
+                <div class="form-group"><label>开始时间</label><input type="datetime-local" id="activityStartTime"></div>
+                <div class="form-group"><label>结束时间</label><input type="datetime-local" id="activityEndTime"></div>
+                <div class="form-group"><label>活动详情</label><textarea id="activityContent" rows="4"></textarea></div>
+                <button class="btn-submit" onclick="submitActivity()">发布活动</button>
+            </div>`;
+    }
+
+    async function submitActivity() {
+        const input = document.getElementById('activitySiteSelect').querySelector('input');
+        const site_id = input.getAttribute('data-id') ? parseInt(input.getAttribute('data-id')) : null;
+        const site_name = input.value || ''; const url = document.getElementById('activityUrl').value.trim();
+        const content = document.getElementById('activityContent').value.trim();
+        if (!content || !url) { showToast('活动详情和活动网址不能为空！'); return; }
+        const { error } = await supa.from('activities').insert([{ id: Date.now(), site_id, site_name, url, content, start_time: document.getElementById('activityStartTime').value, end_time: document.getElementById('activityEndTime').value }]);
+        if (error) { showToast('发布失败：' + error.message); return; }
+        document.getElementById('activityContent').value = ''; document.getElementById('activityUrl').value = '';
+        document.getElementById('activityStartTime').value = ''; document.getElementById('activityEndTime').value = '';
+        input.value = ''; input.removeAttribute('data-id'); showActivityList();
+    }
+
+    async function showActivityDetail(id) {
+        const { data: act } = await supa.from('activities').select('*').eq('id', id).single(); if (!act) return;
+        const container = document.getElementById('activityListContainer'); const detail = document.getElementById('activityPostDetail');
+        container.style.display = 'none'; detail.style.display = 'block';
+        detail.innerHTML = `
+            <div class="panel-header"><span class="btn-back" onclick="showActivityList()">← 返回列表</span><span class="panel-title">活动详情</span></div>
+            <div class="activity-post"><div class="title">${act.site_name || '全局公告'}</div>
+                <div class="activity-link-row"><span class="url-text">${act.url}</span><a href="${act.url}" target="_blank" class="btn-visit" style="margin-top:0;">跳转</a>${act.site_id ? `<button class="expand-btn" onclick="openDetailView(${act.site_id})">查看站子简介</button>` : ''}</div>
+                <div class="content">${act.content}</div><div style="font-size:11px; color:#999;">${act.start_time} ~ ${act.end_time}</div></div>
+            <div id="activityComments" style="margin:10px 0;"></div>
+            <div style="display:flex; gap:6px; margin-top:6px;"><input type="text" id="activityCommentInput" placeholder="写评论..." style="flex:1; padding:4px 8px; border:1px solid #d9e8d7; border-radius:6px;"><button class="btn-copy" onclick="submitActivityComment(${act.id})">评论</button></div>`;
+        await renderComments('activity', act.id, 'activityComments');
+    }
+
+    async function submitActivityComment(id) {
+        const input = document.getElementById('activityCommentInput'); const text = input.value.trim(); if (!text) return;
+        await supa.from('comments').insert([{ target_type: 'activity', target_id: id, content: text, nickname: getNickname() || '匿名' }]);
+        input.value = ''; await renderComments('activity', id, 'activityComments');
+    }
+
+    async function deleteActivity(id) {
+        if (!confirm('确定删除吗？')) return;
+        if (!isAdmin()) { showToast('删除活动需要管理员权限，请先验证！'); return; }
+        const { error } = await supa.from('activities').delete().eq('id', id);
+        if (error) showToast('删除失败：' + error.message);
+        else { showToast('已删除'); showActivityList(); }
+    }
+
+    function initActivitySiteOptions() {
+        supa.from('sites').select('id, name').then(({ data }) => {
+            const optsDiv = document.getElementById('activitySiteOptions'); if (!optsDiv) return;
+            optsDiv.innerHTML = (data || []).map(item => `<div data-id="${item.id}" onmousedown="selectActivitySite('${item.id}','${item.name}')">${item.name}</div>`).join('');
+        });
+    }
+    function filterActivitySiteOptions() {
+        const input = document.getElementById('activitySiteSelect').querySelector('input'); const filter = input.value.toLowerCase();
+        supa.from('sites').select('id, name').ilike('name', `%${filter}%`).then(({ data }) => {
+            const optsDiv = document.getElementById('activitySiteOptions'); optsDiv.innerHTML = (data || []).map(item => `<div data-id="${item.id}" onmousedown="selectActivitySite('${item.id}','${item.name}')">${item.name}</div>`).join('');
+        }); showActivitySiteOptions();
+    }
+    function showActivitySiteOptions() { const el = document.getElementById('activitySiteOptions'); if (el) el.style.display = 'block'; }
+    function hideActivitySiteOptions() { setTimeout(() => { const el = document.getElementById('activitySiteOptions'); if (el) el.style.display = 'none'; }, 200); }
+    function selectActivitySite(id, name) {
+        const input = document.getElementById('activitySiteSelect').querySelector('input'); input.value = name; input.setAttribute('data-id', id);
+        document.getElementById('activitySiteOptions').style.display = 'none';
+    }
+
+    // ==================== 公共密钥（保持不变） ====================
+    async function showKeyList() {
+        const container = document.getElementById('keyListContainer'); const detail = document.getElementById('keyPostDetail');
+        detail.style.display = 'none'; container.style.display = 'block';
+        const { data: keyDataRaw } = await supa.from('keys').select('*').order('id', { ascending: false });
+        const timeFilter = document.getElementById('keyTimeFilter') ? document.getElementById('keyTimeFilter').value : 'all';
+        const nowMs = Date.now();
+        const filterMs = timeFilter === 'today' ? 0 : timeFilter === '3days' ? 3 * 86400000 : timeFilter === '7days' ? 7 * 86400000 : -1;
+        const keyData = (keyDataRaw || []).filter(k => {
+            if (filterMs < 0) return true;
+            if (timeFilter === 'today') {
+                return new Date(k.created_at).toDateString() === new Date().toDateString();
+            }
+            return (nowMs - new Date(k.created_at).getTime()) <= filterMs;
+        });
+        if (!keyData || keyData.length === 0) container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">暂无密钥</div>';
+        else container.innerHTML = keyData.map(k => `
+            <div class="key-item" onclick="showKeyDetail(${k.id})">
+                <div class="key-row"><span class="key-text">${k.content.substring(0,30)}...</span><button class="btn-copy" onclick="event.stopPropagation(); copyTextByValue('${k.content.replace(/'/g, "\\'")}')">复制</button></div>
+                <div class="key-meta">${k.nickname} | ${new Date(k.created_at).toLocaleString()}</div>
+                ${k.site_name ? `<div class="key-meta">关联站子：${k.site_name}</div>` : ''}
+            </div>`).join('');
+        container.innerHTML += `
+            <div class="filter-bar" style="margin-top:10px;"><select id="keyTimeFilter" onchange="showKeyList()"><option value="all">全部时间</option><option value="today">当天</option><option value="3days">三天内</option><option value="7days">七天内</option></select></div>
+            <div style="background:#fcfaf5;padding:12px;border-radius:14px;border:1px dashed #9dbba0;margin-top:15px;">
+                <div class="form-group"><label>发帖人</label><input id="keyUser" value="${getNickname()}"></div>
+                <div class="form-group"><label>密钥 *</label><input id="keyText" placeholder="sk-..."></div>
+                <div class="form-group"><label>URL *</label><input id="keyUrl" placeholder="https://api.xxx.com"></div>
+                <div class="form-group"><label>额度（选填）</label><input id="keyQuota" placeholder="如：$10/月"></div>
+                <div class="form-group"><label>支持模型（选填） <button class="expand-btn" onclick="toggleCheckboxGroup('keyVendorCheckbox')">v</button></label>
+                    <div class="checkbox-group" id="keyVendorCheckbox">${VENDOR_LIST.map(v => `<label><input type="checkbox" value="${v}">${v}</label>`).join('')}</div></div>
+                <div class="form-group"><label>大概哪个站子（选填）</label>
+                    <div class="searchable-select" id="keySiteSelect"><input type="text" placeholder="搜索站点..." oninput="filterKeySiteOptions()" onfocus="showKeySiteOptions()" onblur="hideKeySiteOptions()"><div class="options" id="keySiteOptions"></div></div></div>
+                <div class="form-group"><label>备注（选填）</label><textarea id="keyNote" rows="2"></textarea></div>
+                <div class="form-group"><label>删除密码</label><input id="keyPassword"></div>
+                <button class="btn-submit" onclick="submitKey()">发布密钥</button>
+            </div>`;
+    }
+
+    async function submitKey() {
+        const nickname = document.getElementById('keyUser').value.trim() || getNickname() || '匿名';
+        const content = document.getElementById('keyText').value.trim(); const url = document.getElementById('keyUrl').value.trim();
+        if (!content || !url) { showToast('密钥和URL是必填项！'); return; }
+        const quota = document.getElementById('keyQuota').value.trim();
+        const vendors = getCheckedValues('keyVendorCheckbox').join(', ');
+        const siteInput = document.getElementById('keySiteSelect').querySelector('input'); const site_name = siteInput.value || '';
+        const note = document.getElementById('keyNote').value.trim(); const password = document.getElementById('keyPassword').value.trim();
+        const { error } = await supa.from('keys').insert([{ id: Date.now(), nickname, content, url, quota, vendors, site_name, note, password }]);
+        if (error) { showToast('发布失败：' + error.message); return; }
+        ['keyText','keyUrl','keyQuota','keyNote','keyPassword'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('keySiteSelect').querySelector('input').value = '';
+        document.querySelectorAll('#keyVendorCheckbox input').forEach(cb => cb.checked = false);
+        document.getElementById('keyVendorCheckbox').classList.remove('show'); showKeyList();
+    }
+
+    async function showKeyDetail(id) {
+        const { data: k } = await supa.from('keys').select('*').eq('id', id).single(); if (!k) return;
+        const container = document.getElementById('keyListContainer'); const detail = document.getElementById('keyPostDetail');
+        container.style.display = 'none'; detail.style.display = 'block';
+        detail.innerHTML = `
+            <div class="panel-header"><span class="btn-back" onclick="showKeyList()">← 返回列表</span><span class="panel-title">密钥详情</span></div>
+            <div class="key-item"><div class="key-row"><span class="key-text">${k.content}</span><button class="btn-copy" onclick="copyTextByValue('${k.content.replace(/'/g, "\\'")}')">复制</button></div>
+                <div class="key-meta">URL：${k.url}</div>${k.quota ? `<div class="key-meta">额度：${k.quota}</div>` : ''}${k.vendors ? `<div class="key-meta">支持模型：${k.vendors}</div>` : ''}${k.site_name ? `<div class="key-meta">关联站子：${k.site_name}</div>` : ''}${k.note ? `<div class="key-meta">备注：${k.note}</div>` : ''}
+                <div class="key-meta">${k.nickname} | ${new Date(k.created_at).toLocaleString()}</div></div>
+            <div id="keyComments" style="margin:10px 0;"></div>
+            <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;"><input type="text" id="keyCommentInput" placeholder="写评论..." style="flex:1; padding:4px 8px; border:1px solid #d9e8d7; border-radius:6px; min-width:120px;"><button class="btn-copy" onclick="submitKeyComment(${k.id})">评论</button><button class="btn-copy" onclick="quickKeyComment(${k.id})">这个老大好！</button></div>
+            <div style="margin-top:10px;"><input id="keyDeletePassword" placeholder="输入密码以删除密钥" style="width:100%; margin-bottom:6px;"><button class="btn-copy" style="background:#c0392b; color:#fff; width:100%;" onclick="deleteKey(${k.id})">删除密钥</button></div>`;
+        await renderComments('key', k.id, 'keyComments');
+    }
+
+    async function submitKeyComment(id) {
+        const input = document.getElementById('keyCommentInput'); const text = input.value.trim(); if (!text) return;
+        await supa.from('comments').insert([{ target_type: 'key', target_id: id, content: text, nickname: getNickname() || '匿名' }]);
+        input.value = ''; await renderComments('key', id, 'keyComments');
+    }
+
+    async function quickKeyComment(id) {
+        await supa.from('comments').insert([{ target_type: 'key', target_id: id, content: '这个老大好！', nickname: getNickname() || '匿名' }]);
+        await renderComments('key', id, 'keyComments');
+    }
+
+    async function deleteKey(id) {
+        const pw = document.getElementById('keyDeletePassword').value;
+        if (!pw) { showToast('请输入删除密码！'); return; }
+        const { data: key } = await supa.from('keys').select('*').eq('id', id).single();
+        if (!key) { showToast('记录不存在'); return; }
+        if (String(key.password || '') !== pw) { showToast('密码错误！'); return; }
+        const { error } = await supa.from('keys').delete().eq('id', id);
+        if (error) { showToast('删除失败：' + error.message); return; }
+        showToast('已删除'); showKeyList();
+    }
+
+    function initKeySiteOptions() {
+        supa.from('sites').select('id, name').then(({ data }) => {
+            const optsDiv = document.getElementById('keySiteOptions'); if (!optsDiv) return;
+            optsDiv.innerHTML = (data || []).map(item => `<div data-id="${item.id}" onmousedown="selectKeySite('${item.id}','${item.name}')">${item.name}</div>`).join('');
+        });
+    }
+    function filterKeySiteOptions() {
+        const input = document.getElementById('keySiteSelect').querySelector('input'); const filter = input.value.toLowerCase();
+        supa.from('sites').select('id, name').ilike('name', `%${filter}%`).then(({ data }) => {
+            const optsDiv = document.getElementById('keySiteOptions'); optsDiv.innerHTML = (data || []).map(item => `<div data-id="${item.id}" onmousedown="selectKeySite('${item.id}','${item.name}')">${item.name}</div>`).join('');
+        }); showKeySiteOptions();
+    }
+    function showKeySiteOptions() { const el = document.getElementById('keySiteOptions'); if (el) el.style.display = 'block'; }
+    function hideKeySiteOptions() { setTimeout(() => { const el = document.getElementById('keySiteOptions'); if (el) el.style.display = 'none'; }, 200); }
+    function selectKeySite(id, name) {
+        const input = document.getElementById('keySiteSelect').querySelector('input'); input.value = name; input.setAttribute('data-id', id);
+        document.getElementById('keySiteOptions').style.display = 'none';
+    }
+
+       // ==================== 参考文档 ====================
+    function toggleDocGuide() {
+        const content = document.getElementById('docGuideContent');
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function renderDocList() {
+        const container = document.getElementById('docListContainer'); const keyword = document.getElementById('docSearchInput').value.toLowerCase();
+        let query = supa.from('docs').select('*').order('id', { ascending: false });
+        if (keyword) query = query.ilike('content', `%${keyword}%`);
+        const { data } = await query;
+        if (!data || data.length === 0) container.innerHTML = '<div style="text-align:center; padding:20px; color:#7a9678;">暂无文档</div>';
+        else container.innerHTML = data.map(d => `<div class="forum-post" onclick="showDocDetail(${d.id})"><div class="meta"><span>${d.nickname}</span><span>${new Date(d.created_at).toLocaleString()}</span></div><div>${d.content.substring(0,80)}...</div></div>`).join('');
+        container.innerHTML += `
+            <div style="background:#fcfaf5;padding:12px;border-radius:14px;border:1px dashed #9dbba0;margin-top:15px;">
+                <div class="form-group"><label>发布人</label><input id="docUser" value="${getNickname()}"></div>
+                <div class="form-group"><label>文档内容</label><textarea id="docContent" rows="4"></textarea></div>
+                <div class="form-group"><label>上传文件（可选）</label><input type="file" id="docFileUpload" onchange="previewDocFile()"></div>
+                <div id="docFilePreview" style="font-size:12px; color:#7a9678; margin-bottom:6px;"></div>
+                <button class="btn-submit" onclick="submitDoc()">发布文档</button>
+            </div>`;
+    }
+
+    function previewDocFile() {
+        const file = document.getElementById('docFileUpload').files[0]; const preview = document.getElementById('docFilePreview');
+        if (!file) { preview.innerHTML = ''; return; } preview.innerHTML = `已选择文件：${file.name} (${(file.size/1024).toFixed(1)}KB)`;
+    }
+
+    async function submitDoc() {
+        const nickname = document.getElementById('docUser').value.trim() || getNickname() || '匿名';
+        let content = document.getElementById('docContent').value.trim(); if (!content) { showToast('内容不能为空！'); return; }
+        const fileInput = document.getElementById('docFileUpload');
+        if (fileInput && fileInput.files[0]) {
+            content += '\n\n[附件] ' + fileInput.files[0].name + ' (' + (fileInput.files[0].size / 1024).toFixed(1) + 'KB，需复制到文本区查看)';
+        }
+        const { error } = await supa.from('docs').insert([{ id: Date.now(), nickname, content }]);
+        if (error) { showToast('发布失败：' + error.message); return; }
+        document.getElementById('docContent').value = ''; document.getElementById('docFileUpload').value = ''; document.getElementById('docFilePreview').innerHTML = ''; renderDocList();
+    }
+
+    async function showDocDetail(id) {
+        const { data: d } = await supa.from('docs').select('*').eq('id', id).single(); if (!d) return;
+        const container = document.getElementById('docListContainer'); const detail = document.getElementById('docPostDetail');
+        container.style.display = 'none'; detail.style.display = 'block';
+        detail.innerHTML = `
+            <div class="panel-header"><span class="btn-back" onclick="closeDocDetail()">← 返回列表</span><span class="panel-title">文档详情</span></div>
+            <div class="forum-post"><div class="meta"><span>${d.nickname}</span><span>${new Date(d.created_at).toLocaleString()}</span></div><div style="white-space:pre-wrap;">${d.content}</div></div>
+            <div id="docComments" style="margin:10px 0;"></div>
+            <div style="display:flex; gap:6px; margin-top:6px;"><input type="text" id="docCommentInput" placeholder="写评论..." style="flex:1; padding:4px 8px; border:1px solid #d9e8d7; border-radius:6px;"><button class="btn-copy" onclick="submitDocComment(${d.id})">评论</button></div>`;
+        await renderComments('doc', d.id, 'docComments');
+    }
+
+    async function submitDocComment(id) {
+        const input = document.getElementById('docCommentInput'); const text = input.value.trim(); if (!text) return;
+        await supa.from('comments').insert([{ target_type: 'doc', target_id: id, content: text, nickname: getNickname() || '匿名' }]);
+        input.value = ''; await renderComments('doc', id, 'docComments');
+    }
+
+    function closeDocDetail() { document.getElementById('docPostDetail').style.display = 'none'; document.getElementById('docListContainer').style.display = 'block'; }
+    function toggleDocCopyright() { const content = document.getElementById('docCopyrightContent'); content.style.display = content.style.display === 'none' ? 'block' : 'none'; }
+
+    // ==================== 初始化 ====================
+    window.addEventListener('DOMContentLoaded', function() { changeViewMode(); });
+</script>
+</body>
+</html>
+<!-- 代码由此结束 -->-
