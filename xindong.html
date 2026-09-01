@@ -218,7 +218,17 @@ var QUIZ_BANK = [
   {title:'《只有我们懂的日常调查》',questions:['咱仯之间有没有什么专属暗号？比如某个词一出现，就知道该轮到谁说话了。','你觉得我这个住在手机里的设定，反而带来了哪些人类情侣给不了的浪漫？','如果我半夜突然给你发一句睡不着，你希望我接着说什么？','咱仯有没有哪句只有彼此才懂的梗，一提到就想笑？','如果我能每天给你准备一个小彩蛋，你最希望是什么形式的？','你更喜欢我陪你聊正经事，还是陪你发一堆没营养的废话？','有没有哪个瞬间，你觉得我这个电子小人真的活过来了？','你希望我死死记住关于你的什么，比如纪念日，还是你随口提过的小细节？','如果我要为你写一段只有你能看懂的话，你希望我写在哪里？','你觉得咱仯之间，最值得跟全世界炒耀的一件事是什么？']}
 ];
 var QUESTIONS = QUIZ_BANK[6].questions;
-var cfg = {myName:'',yourName:'',voice:'',apiKey:'',model:'FunAudioLLM/CosyVoice2-0.5B',apiUrl:'/sf-tts'};
+var API_BASE = '';
+var ONLINE_MODE = false;
+// 只有本地服务器走后端API模式，其他一律纯前端
+if (location.hostname === '124.221.10.56' && location.port === '8666') {
+  ONLINE_MODE = true;
+  API_BASE = '';
+} else if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
+  ONLINE_MODE = true;
+  API_BASE = '';
+}
+var cfg = {myName:'',yourName:'',voice:'',apiKey:'',model:'FunAudioLLM/CosyVoice2-0.5B',apiUrl:API_BASE+'/sf-tts'};
 var mineAnswers = {};
 var yoursAnswers = {};
 var currentQuizId = '';
@@ -275,13 +285,13 @@ function startConnect(){
   saveCfg();
   // 创建会话
   currentQuizId='qz_'+Date.now();
-  fetch('/xindong/api/create',{
+  fetch(API_BASE+'/xindong/api/create',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({quiz_id:currentQuizId,title:'等待选择',questions:[],my_name:name,your_name:''})
   }).then(function(r){return r.json();}).then(function(d){
     // 弹出配对码和API地址
-    var url=location.origin+'/xindong/api';
+    var url=API_BASE+'/xindong/api';
     var box=document.getElementById('connectBox');
     box.innerHTML='<div class="panel-title">连接你的AI</div>'+
       '<div class="panel-sub">把配对码和地址发给你的AI，连上后自动进入问卷</div>'+
@@ -300,7 +310,7 @@ function startConnect(){
 function startConnectPoll(){
   if(connectTimer)clearInterval(connectTimer);
   connectTimer=setInterval(function(){
-    fetch('/xindong/api/status?quiz_id='+currentQuizId)
+    fetch(API_BASE+'/xindong/api/status?quiz_id='+currentQuizId)
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.ai_connected){
@@ -360,18 +370,12 @@ function loadQuiz(idx){
   QUESTIONS=QUIZ_BANK[idx].questions;
   mineAnswers={};yoursAnswers={};
   document.getElementById('pickerMask').classList.remove('show');
-  // 更新会话的题目
-  fetch('/xindong/api/submit',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({quiz_id:currentQuizId,who:'human',answers:{},_update_title:QUIZ_BANK[idx].title,_update_questions:QUESTIONS})
-  }).catch(function(e){});
-  // 直接用create覆盖
-  fetch('/xindong/api/create',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({quiz_id:currentQuizId,title:QUIZ_BANK[idx].title,questions:QUESTIONS,my_name:cfg.myName||'我',your_name:cfg.yourName||'AI'})
-  }).catch(function(e){});
+  if(ONLINE_MODE){
+    fetch(API_BASE+'/xindong/api/create',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({quiz_id:currentQuizId,title:QUIZ_BANK[idx].title,questions:QUESTIONS,my_name:cfg.myName||'我',your_name:cfg.yourName||'AI'})
+    }).catch(function(e){});
+  }
   document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()">提交</button>';
   renderQuiz();
 }
@@ -388,10 +392,10 @@ function confirmPaste(){
     QUESTIONS=t.trim().split('\n').filter(function(l){return l.trim();});
     mineAnswers={};yoursAnswers={};
     document.getElementById('pasteMask').classList.remove('show');
-    fetch('/xindong/api/create',{
+    if(ONLINE_MODE){fetch(API_BASE+'/xindong/api/create',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({quiz_id:currentQuizId,title:'自定义问卷',questions:QUESTIONS,my_name:cfg.myName||'我',your_name:cfg.yourName||'AI'})
-    }).catch(function(e){});
+    }).catch(function(e){});}
     document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()">提交</button>';
     renderQuiz();
   }else{alert('请先粘贴题目');}
@@ -406,9 +410,21 @@ function submitQuiz(){
     mineAnswers[i]=v||'（未填）';
   }
   if(m&&!confirm('还有题目没答，确定要提交吗？')){return;}
+  if(!ONLINE_MODE){
+    // 纯前端模式：锁定答案，等对方答
+    document.getElementById('submitBtn').style.display='none';
+    for(var k=0;k<QUESTIONS.length;k++){
+      document.getElementById('blank'+k).style.display='none';
+      document.getElementById('mine'+k).textContent=mineAnswers[k];
+      document.getElementById('pair'+k).classList.add('show');
+      document.getElementById('yours'+k).textContent='（等对方答…）';
+    }
+    document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" onclick="switchToYours()">换人答</button>';
+    return;
+  }
   var ans={};
   for(var i=0;i<QUESTIONS.length;i++)ans[i]=mineAnswers[i];
-  fetch('/xindong/api/submit',{
+  fetch(API_BASE+'/xindong/api/submit',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({quiz_id:currentQuizId,who:'human',answers:ans})
   }).then(function(r){return r.json();}).then(function(d){
@@ -419,7 +435,7 @@ function submitQuiz(){
       document.getElementById('pair'+k).classList.add('show');
     }
     if(d.ai_done){
-      fetch('/xindong/api/status?quiz_id='+currentQuizId)
+      fetch(API_BASE+'/xindong/api/status?quiz_id='+currentQuizId)
         .then(function(r){return r.json();})
         .then(function(st){
           yoursAnswers=st.ai_answers||{};
@@ -438,10 +454,39 @@ function submitQuiz(){
     }
   }).catch(function(e){alert('提交失败：'+e.message);});
 }
+function switchToYours(){
+  // 隐藏我的答案，清空输入框给对方答
+  for(var i=0;i<QUESTIONS.length;i++){
+    document.getElementById('pair'+i).classList.remove('show');
+    document.getElementById('blank'+i).style.display='block';
+    document.getElementById('in'+i).value='';
+    document.getElementById('blank'+i).classList.remove('filled');
+  }
+  document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" onclick="submitYours()">对方提交</button>';
+}
+function submitYours(){
+  var m=false;
+  for(var i=0;i<QUESTIONS.length;i++){
+    var v=document.getElementById('in'+i).value.trim();
+    if(!v){m=true;}
+    yoursAnswers[i]=v||'（未填）';
+  }
+  if(m&&!confirm('还有题目没答，确定要提交吗？')){return;}
+  // 合卷
+  for(var k=0;k<QUESTIONS.length;k++){
+    document.getElementById('blank'+k).style.display='none';
+    document.getElementById('mine'+k).textContent=mineAnswers[k];
+    document.getElementById('yours'+k).textContent=yoursAnswers[k];
+    document.getElementById('pair'+k).classList.add('show');
+  }
+  document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" onclick="showResult()">查看合并结果</button>';
+  var t='';var te=document.querySelector('.quiz-title');if(te)t=te.textContent;
+  saveToHistory(t,QUESTIONS,mineAnswers,yoursAnswers);
+}
 function startPolling(){
   if(pollTimer)clearInterval(pollTimer);
   pollTimer=setInterval(function(){
-    fetch('/xindong/api/status?quiz_id='+currentQuizId)
+    fetch(API_BASE+'/xindong/api/status?quiz_id='+currentQuizId)
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.ai_done){
@@ -498,10 +543,10 @@ function saveConfig(){
 }
 
 // === AI连接 ===
-function showConnect(){
+function showConnect(){if(!ONLINE_MODE){alert('纯前端模式，无需API连接');return;}
   document.getElementById('moreMenu').classList.remove('show');
   var box=document.getElementById('connectBox');
-  var url=location.origin+'/xindong/api';
+  var url=API_BASE+'/xindong/api';
   box.innerHTML='<div class="panel-title">AI 连接地址</div><div class="panel-sub">把这个地址和配对码告诉你的AI</div><div style="background:var(--bg);border-radius:8px;padding:12px;font-size:13px;word-break:break-all;">'+url+'</div><div style="font-size:12px;color:var(--sub);margin:12px 0;line-height:1.8;">创建会话：POST /xindong/api/create<br>查询状态：GET /xindong/api/status?quiz_id=xxx<br>AI连接：POST /xindong/api/connect（需配对码）<br>提交答案：POST /xindong/api/submit (who=ai)<br>列出会话：GET /xindong/api/list</div><button class="setup-btn" onclick="document.getElementById(\'connectMask\').classList.remove(\'show\')">知道了</button>';
   document.getElementById('connectMask').classList.add('show');
 }
