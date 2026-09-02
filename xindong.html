@@ -351,7 +351,12 @@ function startConnectPoll(){
           document.getElementById('connectMask').classList.remove('show');
           document.getElementById('setupPage').classList.remove('show');
           document.getElementById('quizPage').classList.add('show');
-          renderQuiz();
+          // 自动同步默认问卷题目到后端
+            fetch(API_BASE+'/xindong/api/create',{
+              method:'POST',headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({quiz_id:currentQuizId,title:QUIZ_BANK[6].title,questions:QUESTIONS,my_name:cfg.myName||'我',your_name:cfg.yourName||'AI'})
+            }).catch(function(e){console.log('同步默认题目失败:',e);});
+            renderQuiz();
           document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()">提交</button>';
         }
       }).catch(function(e){});
@@ -404,7 +409,7 @@ function loadQuiz(idx){
     fetch(API_BASE+'/xindong/api/create',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({quiz_id:currentQuizId,title:QUIZ_BANK[idx].title,questions:QUESTIONS,my_name:cfg.myName||'我',your_name:cfg.yourName||'AI'})
-    }).catch(function(e){});
+    }).catch(function(e){alert('同步问卷失败：'+e.message+'\n请刷新重试');});
   }
   document.getElementById('actionBar').innerHTML='<button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()">提交</button>';
   renderQuiz();
