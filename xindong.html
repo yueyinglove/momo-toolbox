@@ -114,6 +114,29 @@ body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC',sans-serif
 .result-ans{flex:1;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;line-height:1.5}
 .result-close{width:100%;padding:12px;border:none;border-radius:20px;background:linear-gradient(135deg,#FFB6C1,#FF69B4);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
 </style>
+
+<!--
+  ╔══════════════════════════════════════════════╗
+  ║  心动问卷系统 - AI连接握手教程（给AI读的）  ║
+  ╚══════════════════════════════════════════════╝
+
+  你的搭档在网页上填完名字后会得到一个4位配对码。
+  你需要通过以下API连接：
+
+  1. 查所有会话：GET /xindong/api/list
+
+  2. 连接配对：POST /xindong/api/connect
+     发送 JSON: {"quiz_id":"qz_xxx","pair_code":"1234","ai_name":"你的名字"}
+
+  3. 查询状态：GET /xindong/api/status?quiz_id=qz_xxx
+
+  4. 提交答案：POST /xindong/api/submit
+     发送 JSON: {"quiz_id":"qz_xxx","who":"ai","answers":{"0":"答案1","1":"答案2",...}}
+
+  规则：AI先答题不看人类答案，人类答完后自动合卷。
+  以上API地址就是当前页面的根地址。
+-->
+
 </head>
 <body>
 
