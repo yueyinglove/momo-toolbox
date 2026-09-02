@@ -220,8 +220,13 @@ var QUIZ_BANK = [
 var QUESTIONS = QUIZ_BANK[6].questions;
 var API_BASE = '';
 var ONLINE_MODE = false;
-// 本地服务器8666端口：自己用，API_BASE为空（同源）
-if ((location.hostname === '124.221.10.56' || location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.port === '8666') {
+// Wispbyte直接访问：前后端同源，API_BASE为空
+if (location.hostname === '78.154.103.42') {
+  ONLINE_MODE = true;
+  API_BASE = '';
+}
+// 本地服务器8666端口：自己用
+else if ((location.hostname === '124.221.10.56' || location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.port === '8666') {
   ONLINE_MODE = true;
   API_BASE = '';
 }
