@@ -4,14 +4,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>momo 个人工具箱</title>
     <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@100;300;400;700;900&family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&family=ZCOOL+KuaiHei&family=ZCOOL+KuaiLe&family=Zhi+Mang+Xing&family=Liu+Jian+Mao+Cao&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: "PingFang SC", "Noto Sans SC", sans-serif; background: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 0; margin: 0; }
-        .app-container { width: 100%; max-width: 100%; background: transparent; padding: 10px; position: relative; }
-        .main-interface { width: 100%; background: #fcfaf5; border-radius: 30px; border: 7px dashed #9dbba0; padding: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 30px; transition: all 0.2s ease; position: relative; overflow: hidden; margin: 0 auto; height: auto; min-height: 1025px; }
+        .app-container { width: 100%; max-width: 100%; background: transparent; padding: 10px; position: relative; z-index: 1; }
+        .main-interface { width: 100%; background: #fcfaf5; border-radius: 30px; border: 3px dashed #9dbba0; padding: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 30px; transition: all 0.2s ease; position: relative; overflow: hidden; margin: 0 auto; height: auto; min-height: auto; }
         .view-mode-selector { position: absolute; top: 60px; right: 20px; z-index: 999; background: rgba(255,255,255,0.9); padding: 4px 14px; border-radius: 20px; border: 1.5px solid #a4c2a0; backdrop-filter: blur(6px); font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .view-mode-selector select { border: none; background: transparent; outline: none; color: #2e4d2c; font-weight: bold; cursor: pointer; }
         .mode-card .main-interface { flex-direction: column; align-items: center; margin: 0 auto; display: flex; }
@@ -25,38 +25,54 @@
         .name-bg-box { position: absolute; top: 0; left: 0; z-index: -1; background: transparent; border-radius: 8px; background-size: cover; background-position: center; transition: 0.1s; }
         .absolute-name { font-weight: 700; line-height: 1.4; transition: 0.1s; }
         .absolute-record { position: absolute; cursor: pointer; z-index: 20; transition: 0.1s; }
-        .record-disc { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #333, #111); box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; position: relative; }
-        .record-disc.playing { animation: spin 3s linear infinite; }
+        /* 唱片机持续旋转（放慢一倍：12s / 播放时 6s） */
+        .record-disc { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #333, #111); box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; position: relative; animation: spin 12s linear infinite; }
+        .record-disc.playing { animation: spin 6s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* 头像点击慢转一圈回到原位 */
+        @keyframes avatarSpinOnce { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* 头像点击慢转一圈回到原位（放慢一半：4.4s 完整 360° 后停住） */
+        .avatar-spin { animation: avatarSpinOnce 4.4s cubic-bezier(0.45,0,0.55,1) both; }
+        /* 九宫格按钮果冻敲击感 */
+        @keyframes jelly { 0% { transform: scale(1); } 25% { transform: scale(0.86,0.92); } 45% { transform: scale(1.06,0.98); } 65% { transform: scale(0.96,1.02); } 82% { transform: scale(1.02,0.99); } 100% { transform: scale(1); } }
+        .app-icon.jelly { animation: jelly 0.55s ease both; }
+        /* 背景图点击 duang */
+        @keyframes duang { 0% { transform: scale(1); } 28% { transform: scale(0.975); } 58% { transform: scale(1.025); } 78% { transform: scale(0.99); } 100% { transform: scale(1); } }
+        .banner-duang { animation: duang 0.5s ease both; }
         .record-label { border-radius: 50%; background: #ffddaa; border: 2px solid #fff; background-size: cover; background-position: center; }
         .tts-wrapper { position: absolute; z-index: 15; transition: 0.1s; }
-        .tts-bg-box { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; border: 2px dashed #D9E8D7; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); z-index: 1; pointer-events: none; }
+        .tts-bg-box { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; border: 1.5px dashed #D9E8D7; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); z-index: 1; pointer-events: none; }
         .tts-text-box { position: relative; z-index: 2; padding: 10px 14px; line-height: 1.6; cursor: pointer; display: flex; flex-direction: column; justify-content: center; }
         .app-section { flex: 1; display: flex; flex-direction: column; padding: 0 15px; justify-content: flex-start; }
         .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
-        .app-block { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .app-icon { border-radius: 18px; background: #b8d4b0; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: bold; cursor: pointer; background-size: cover; background-position: center; transition: transform 0.1s; width: 70px; height: 70px; }
-        .app-icon:active { transform: scale(0.92); }
-        .app-name { color: #4A6F48; font-weight: 600; text-align: center; font-size: 12px; }
+        /* 全局去除移动端长按高亮/选择框（绿色/蓝色半透明） */
+        * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+        .app-block { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; outline: none; touch-action: none; }
+        /* 九宫格按钮：白色底，去除长按选择框 */
+        .app-icon { border-radius: 18px; background: #ffffff; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: bold; cursor: pointer; transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1); width: 70px; height: 70px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.07); -webkit-tap-highlight-color: transparent; outline: none; }
+        .app-icon:active { transform: scale(0.9); }
+        .app-icon-img { width: 95%; height: 95%; object-fit: contain; mix-blend-mode: multiply; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+        .app-name { color: #4A6F48; font-weight: 600; text-align: center; font-size: 11px; line-height: 1.2; }
         .footer { padding-top: 12px; flex-shrink: 0; }
-        .footer-dashed-box { border: 2px dashed #E4F0E2; border-radius: 16px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; }
+        .footer-dashed-box { border: 1.5px dashed #E4F0E2; border-radius: 16px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; }
         .footer-content { font-family: 'Noto Sans SC', sans-serif; font-size: 4px; color: #a0b89e; font-weight: bold; line-height: 1.8; }
-        .content-panel { display: none; width: 100%; height: 100%; min-height: 800px; background: #fcfaf5; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .content-panel { display: none; width: 100%; height: 100%; min-height: auto; background: #fcfaf5; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         .content-panel.active { display: block; }
-        .panel-header { display: flex; align-items: center; gap: 10px; border-bottom: 2px dashed #e4efe2; padding-bottom: 12px; margin-bottom: 15px; position: sticky; top: 0; background: #fcfaf5; z-index: 10; }
-        .panel-title { flex: 1; font-weight: bold; color: #365e34; font-size: 18px; }
+        .panel-header { display: flex; align-items: center; gap: 10px; border-bottom: 1.5px dashed #e4efe2; padding-bottom: 12px; margin-bottom: 15px; position: sticky; top: 0; background: #fcfaf5; z-index: 10; }
+        .panel-title { flex: 1; font-weight: bold; color: #365e34; font-size: 16px; }
         .btn-back { background: #e4efe2; border: none; border-radius: 20px; padding: 6px 18px; color: #4a6f48; font-weight: bold; font-size: 14px; cursor: pointer; }
         .btn-back:active { background: #d9e8d7; }
-        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
-        .filter-input { flex: 1; padding: 8px 12px; border: 2px solid #d9e8d7; border-radius: 12px; font-size: 14px; outline: none; background: #fff; }
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; position: sticky; top: 54px; z-index: 9; background: #fcfaf5; padding: 8px 0; border-bottom: 1px solid #eef3ec; }
+        .filter-input { flex: 1; padding: 8px 12px; border: 1.5px solid #d9e8d7; border-radius: 12px; font-size: 14px; outline: none; background: #fff; }
         .filter-input:focus { border-color: #9dbba0; }
         .filter-btn { background: #4a6f48; color: #fff; border: none; border-radius: 12px; padding: 8px 15px; font-size: 13px; cursor: pointer; white-space: nowrap; }
         .filter-btn:active { background: #365e34; }
-        .multi-filter-area { display: none; background: #fff; border: 2px solid #d9e8d7; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .multi-filter-area { display: none; background: #fff; border: 1.5px solid #d9e8d7; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         .multi-filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; align-items: center; }
         .multi-filter-row select, .multi-filter-row input { padding: 5px 8px; border: 1px solid #d9e8d7; border-radius: 6px; font-size: 13px; }
         .data-item { background: #fff; border-radius: 14px; padding: 12px; border: 1px solid #e4efe2; margin-bottom: 10px; cursor: pointer; transition: 0.1s; position: relative; }
         .data-item:active { background: #fcfaf5; }
+        .swipe-hint { position: absolute; top: 50%; right: 14px; transform: translateY(-50%); padding: 4px 12px; border-radius: 14px; color: #fff; font-size: 13px; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.15s; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
         .tag { background: #e4efe2; color: #4a6f48; padding: 2px 10px; border-radius: 12px; font-size: 11px; display: inline-block; margin-right: 4px; }
         .detail-modal { display: none; background: #fff; border-radius: 20px; padding: 20px; border: 2px solid #9dbba0; margin-top: 15px; position: relative; }
         .detail-modal.active { display: block; }
@@ -69,10 +85,10 @@
         .expand-btn { color: #4a6f48; font-size: 12px; cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; margin-left: 6px; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-weight: 600; color: #4a6f48; font-size: 14px; margin-bottom: 4px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 2px solid #d9e8d7; border-radius: 12px; font-size: 14px; background: #fff; outline: none; font-family: inherit; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1.5px solid #d9e8d7; border-radius: 12px; font-size: 14px; background: #fff; outline: none; font-family: inherit; }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #9dbba0; }
         .btn-submit { background: #4a6f48; color: #fff; border: none; border-radius: 20px; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .checkbox-group { display: none; flex-wrap: wrap; gap: 8px; background: #fff; border: 2px solid #d9e8d7; border-radius: 12px; padding: 10px; max-height: 150px; overflow-y: auto; }
+        .checkbox-group { display: none; flex-wrap: wrap; gap: 8px; background: #fff; border: 1.5px solid #d9e8d7; border-radius: 12px; padding: 10px; max-height: 150px; overflow-y: auto; }
         .checkbox-group.show { display: flex; }
         .forum-post { background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 1px solid #e4efe2; }
         .forum-post .meta { display: flex; justify-content: space-between; font-size: 12px; color: #7a9678; margin-bottom: 4px; }
@@ -108,6 +124,8 @@
         .progress-bar { background: #e4efe2; border-radius: 8px; height: 6px; margin: 4px 0; }
         .progress-fill { background: #4a6f48; height: 100%; border-radius: 8px; }
         .pagination { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 15px; flex-wrap: wrap; }
+        /* 查找站子分页行（首页/末页/上页/下页/页码）固定展示，不被滚动影响 */
+        #tablePagination { position: sticky; bottom: 0; background: #fcfaf5; z-index: 8; padding: 8px 0 2px; margin-top: 10px; }
         .pagination button { background: #e4efe2; border: none; border-radius: 8px; padding: 6px 12px; color: #4a6f48; font-size: 13px; cursor: pointer; }
         .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
         .pagination .page-info { font-size: 13px; color: #7a9678; }
@@ -123,14 +141,14 @@
 <div class="app-container mode-card" id="appContainer">
     <div class="main-interface" id="mainInterface">
         <div class="view-mode-selector">
-            <label>显示模式: <select id="viewModeSelect" onchange="changeViewMode()"><option value="mode-card" selected>手机居中卡片</option><option value="mode-pc">电脑模式同宽</option></select></label>
+            <label>显示模式: <select id="viewModeSelect" onchange="_userManualMode=true;changeViewMode()"><option value="mode-card" selected>手机居中卡片</option><option value="mode-pc">电脑模式同宽</option></select></label>
         </div>
         <div class="toast-container" id="toastContainer"></div>
 
         <div class="preview-area" id="previewArea">
-            <div class="banner-container" id="bannerContainer" style="background-image: url('https://i.ibb.co/GzBfY1j/1784753404572.jpg'); background-size: cover; background-position: 0px -64px;">
+            <div class="banner-container" id="bannerContainer" onclick="bannerDuang(event)" style="background-image: url('https://i.ibb.co/GzBfY1j/1784753404572.jpg'); background-size: cover; background-position: 0px -64px;">
                 <div class="absolute-avatar-frame" id="avatarFrameEl" style="width: 161px; height: 161px; opacity: 1; transform: translate(367px, 169px); background-image: none;"></div>
-                <div class="absolute-avatar" id="avatarEl" onclick="document.getElementById('avatarUpload').click()" style="width: 106px; height: 106px; transform: translate(392px, 210px);">
+                <div class="absolute-avatar" id="avatarEl" style="width: 106px; height: 106px; transform: translate(392px, 210px) scale(1.05);">
                     <img id="avatarImg" src="https://i.ibb.co/hF5NDY5L/Camera-XHS-1784732477986.jpg" alt="头像">
                     <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="handleUpload(this, 'avatarImg')">
                 </div>
@@ -138,32 +156,32 @@
                     <div class="name-bg-box" id="nameBgBoxEl" style="width: 191px; height: 40px; background-color: #ffffff; opacity: 0; transform: translate(359px, 328px);"></div>
                     <div class="absolute-name" id="nameEl" style="font-family: 'Noto Sans SC', sans-serif; font-size: 20px; color: #4a6f48; font-weight: normal; transform: translate(395px, 328px);">momo之家</div>
                 </div>
-                <div class="absolute-record" id="recordEl" onclick="toggleTTS()" style="width: 157px; height: 157px; transform: translate(21px, 15px);">
+                <div class="absolute-record" id="recordEl" style="width: 157px; height: 157px; transform: translate(21px, 15px);">
                     <div class="record-disc" id="recordDisc"><div class="record-label" id="recordCenter" style="width: 66%; height: 66%; background-image: url('https://i.ibb.co/hF5NDY5L/Camera-XHS-1784732477986.jpg'); background-size: cover;" onclick="event.stopPropagation(); document.getElementById('recordCenterUpload').click()"></div></div>
                     <input type="file" id="recordCenterUpload" accept="image/*" style="display:none" onchange="handleUpload(this, 'recordCenter')">
                 </div>
                 <div class="tts-wrapper" id="ttsWrapperEl">
                     <div class="tts-bg-box" id="ttsBgBox" style="width: 307px; height: 52px; background-color: #ffffff; opacity: 0.92; transform: translate(7px, 184px); border-radius: 16px; border: 2px dashed #D9E8D7;"></div>
-                    <div class="tts-text-box" id="ttsBoxEl" onclick="toggleTTS()" style="font-family: 'Zhi Mang Xing', cursive; font-size: 27px; color: #4a6f48; font-weight: bold; transform: translate(7px, 184px);"><div id="ttsContentDisplay">与君初相识，犹如故人归。</div></div>
+                    <div class="tts-text-box" id="ttsBoxEl" style="font-family: 'Zhi Mang Xing', cursive; font-size: 27px; color: #4a6f48; font-weight: bold; transform: translate(7px, 184px); user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none;"><div id="ttsContentDisplay">与君初相识，犹如故人归。</div></div>
                 </div>
             </div>
             <div class="app-section" id="appSection" style="margin-top: 100px; min-height: 100px; margin-bottom: -50px;">
                 <div class="app-grid" id="appGridContainer" style="transform: scale(1); transform-origin: top center;">
-                    <div class="app-block" onclick="openTool('panelTable')"><div class="app-icon" style="background-image: url('https://i.ibb.co/07XZNy8/1784752761049.jpg');"></div><div class="app-name">查找站子</div></div>
-                    <div class="app-block" onclick="openTool('panelAdd')"><div class="app-icon" style="background-image: url('https://i.ibb.co/Mxj97v2g/1784752730840.jpg');"></div><div class="app-name">新建录入</div></div>
-                    <div class="app-block" onclick="openTool('panelForum')"><div class="app-icon" style="background-image: url('https://i.ibb.co/JRV6cxY6/1784752696697.jpg');"></div><div class="app-name">反馈论坛</div></div>
-                    <div class="app-block" onclick="openTool('panelModify')"><div class="app-icon" style="background-image: url('https://i.ibb.co/Qjr2bckG/1784752584940.jpg');"></div><div class="app-name">修改</div></div>
-                    <div class="app-block" onclick="openTool('panelKey')"><div class="app-icon" style="background-image: url('https://i.ibb.co/YTWFmH89/1784752612405.jpg');"></div><div class="app-name">公共密钥</div></div>
-                    <div class="app-block" onclick="openTool('panelDelete')"><div class="app-icon" style="background-image: url('https://i.ibb.co/nqgj8zKr/1784752658872.jpg');"></div><div class="app-name">删除</div></div>
-                    <div class="app-block" onclick="openTool('panelActivity')"><div class="app-icon" style="background-image: url('https://i.ibb.co/VptVVXT5/1784752557565.jpg');"></div><div class="app-name">限时活动</div></div>
-                    <div class="app-block" onclick="openTool('panelDoc')"><div class="app-icon" style="background-image: url('https://i.ibb.co/Pz6K5k41/1784752520124.jpg');"></div><div class="app-name">参考文档</div></div>
-                    <div class="app-block" onclick="openTool('panelMy')"><div class="app-icon" style="background-image: url('https://i.ibb.co/1fj8cWd2/1784752497005.jpg');"></div><div class="app-name">我的</div></div>
+                    <div class="app-block" data-panel="panelTable"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/07XZNy8/1784752761049.jpg" alt="查找站子"></div><div class="app-name">查找站子</div></div>
+                    <div class="app-block" data-panel="panelAdd"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/Mxj97v2g/1784752730840.jpg" alt="新建录入"></div><div class="app-name">新建录入</div></div>
+                    <div class="app-block" data-panel="panelForum"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/JRV6cxY6/1784752696697.jpg" alt="反馈论坛"></div><div class="app-name">反馈论坛</div></div>
+                    <div class="app-block" data-panel="panelModify"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/Qjr2bckG/1784752584940.jpg" alt="修改"></div><div class="app-name">修改</div></div>
+                    <div class="app-block" data-panel="panelKey"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/YTWFmH89/1784752612405.jpg" alt="公共密钥"></div><div class="app-name">公共密钥</div></div>
+                    <div class="app-block" data-panel="panelDelete"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/nqgj8zKr/1784752658872.jpg" alt="删除"></div><div class="app-name">删除</div></div>
+                    <div class="app-block" data-panel="panelActivity"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/VptVVXT5/1784752557565.jpg" alt="限时活动"></div><div class="app-name">限时活动</div></div>
+                    <div class="app-block" data-panel="panelDoc"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/Pz6K5k41/1784752520124.jpg" alt="参考文档"></div><div class="app-name">参考文档</div></div>
+                    <div class="app-block" data-panel="panelMy"><div class="app-icon"><img class="app-icon-img" src="https://i.ibb.co/1fj8cWd2/1784752497005.jpg" alt="我的"></div><div class="app-name">我的</div></div>
                 </div>
             </div>
             <div class="footer" id="footerArea" style="margin-top: -50px;">
                 <div class="footer-dashed-box">
                     <div class="footer-content" id="footerContent">本站点为「Momo之家·春山月」个人兴趣制作的永久免费公益工具，仅用于AI API、大模型平台信息汇总与技术交流，无任何充值、会员、付费授权、代充、售卖资料等商业收费服务，官方不会收取用户任何费用。<br>官方交流QQ群：一群 momo之家：1104281873 ｜ 二群 袋鼠之家：623201529 ｜ 三群 淘宝之家：1080802627，其余所有私域分享、倒卖链接、有偿售卖资源、第三方代理均为假冒人员私自行为，和本站官方无关。<br>用户若因非官方渠道私下交易造成被骗、财产损失、信息泄露等问题，本站概不承担任何责任。禁止私自破解、二次分发、商用倒卖本工具及汇总数据，违者将依法追责。<br>© 2026 momo之家.春山月</div>
-                    <button class="btn-copy-group" onclick="copyGroupNumber()">复制群号</button>
+                    <button class="btn-copy-group">复制群号</button>
                 </div>
             </div>
         </div>
@@ -208,6 +226,7 @@
             </div>
             <div class="multi-filter-row">
                 <button class="filter-btn" onclick="renderTableData()" style="background:#365e34;">应用筛选</button>
+                <button class="filter-btn" onclick="resetTableFilter()" style="background:#7a9678;">重置筛选</button>
             </div>
         </div>
 
@@ -251,20 +270,20 @@
     </div>
     <div class="form-group"><label>网址 *</label><input id="addWebUrl" placeholder="https://xxx.com" autocomplete="off"></div>
     <div class="form-group"><label>API地址（选填，留空则自动用网址）</label><input id="addUrl" placeholder="https://api.xxx.com/v1" autocomplete="off"></div>
-    <div class="form-group"><label>调用速度（选填）</label><select id="addSpeed"><option value=""></option><option value="快">快</option><option value="一般">一般</option><option value="慢">慢</option></select></div>
-    <div class="form-group"><label>是否公益（选填）</label><select id="addPublic"><option value=""></option><option value="是">是</option><option value="否">否</option></select></div>
-    <div class="form-group"><label>可签到（选填）</label><select id="addCheckin"><option value=""></option><option value="是">是</option><option value="否">否</option></select></div>
-    <div class="form-group"><label>是否需要特殊网络？（选填）</label><select id="addMagic"><option value=""></option><option value="是">是</option><option value="否">否</option></select></div>
+    <div class="form-group"><label>调用速度（选填）</label><select id="addSpeed"><option value="">​</option><option value="快">快</option><option value="一般">一般</option><option value="慢">慢</option></select></div>
+    <div class="form-group"><label>是否公益（选填）</label><select id="addPublic"><option value="">​</option><option value="是">是</option><option value="否">否</option></select></div>
+    <div class="form-group"><label>可签到（选填）</label><select id="addCheckin"><option value="">​</option><option value="是">是</option><option value="否">否</option></select></div>
+    <div class="form-group"><label>是否需要特殊网络？（选填）</label><select id="addMagic"><option value="">​</option><option value="是">是</option><option value="否">否</option></select></div>
     <div class="form-group"><label>自测推荐指数（选填）</label><select id="addStars"><option value="0">0星</option><option value="5">5星</option><option value="4">4星</option><option value="3">3星</option><option value="2">2星</option><option value="1">1星</option></select></div>
-    <div class="form-group"><label>状态（选填）</label><select id="addStatus"><option value=""></option><option value="正常">正常</option><option value="失效">失效</option><option value="已下线">已下线</option></select></div>
-    <div class="form-group"><label>是否官方直营（选填）</label><select id="addOfficial"><option value=""></option><option value="官方直营">官方直营</option><option value="第三方中转">第三方中转</option></select></div>
-    <div class="form-group"><label>费率（选填）</label><select id="addFee"><option value=""></option><option value="免费">免费</option><option value="低">低</option><option value="中">中</option><option value="高">高</option></select></div>
-    <div class="form-group"><label>注册状态（选填）</label><select id="addRegMain" onchange="toggleRegSubOptions()"><option value=""></option><option value="开放注册中">开放注册中</option><option value="限时开放">限时开放</option><option value="暂不开放">暂不开放</option></select></div>
+    <div class="form-group"><label>状态（选填）</label><select id="addStatus"><option value="">​</option><option value="正常">正常</option><option value="失效">失效</option><option value="已下线">已下线</option></select></div>
+    <div class="form-group"><label>是否官方直营（选填）</label><select id="addOfficial"><option value="">​</option><option value="官方直营">官方直营</option><option value="第三方中转">第三方中转</option></select></div>
+    <div class="form-group"><label>费率（选填）</label><select id="addFee"><option value="">​</option><option value="免费">免费</option><option value="低">低</option><option value="中">中</option><option value="高">高</option></select></div>
+    <div class="form-group"><label>注册状态（选填）</label><select id="addRegMain" onchange="toggleRegSubOptions()"><option value="">​</option><option value="开放注册中">开放注册中</option><option value="限时开放">限时开放</option><option value="暂不开放">暂不开放</option></select></div>
     <div class="form-group" id="regSubOptions" style="display:none;">
         <label>注册方式（可多选）</label>
         <div class="checkbox-group" id="addRegStatusCheckbox" style="display:flex;"></div>
     </div>
-    <div class="form-group"><label>试吃福利（选填）</label><select id="addTrial" onchange="toggleTrialCustom()"><option value=""></option><option value="无">无</option><option value="送少量">送少量</option><option value="送中等">送中等</option><option value="送大量">送大量</option><option value="自定义">自定义</option></select></div>
+    <div class="form-group"><label>试吃福利（选填）</label><select id="addTrial" onchange="toggleTrialCustom()"><option value="">​</option><option value="无">无</option><option value="送少量">送少量</option><option value="送中等">送中等</option><option value="送大量">送大量</option><option value="自定义">自定义</option></select></div>
     <div class="form-group" id="trialCustomGroup" style="display:none;"><input id="addTrialCustom" placeholder="请描述试吃福利"></div>
     <div class="form-group"><label>站方联系方式（选填）</label><input id="addContact" placeholder="官方QQ群号、官方邮箱等"></div>
     <div class="form-group"><label>邀请人（选填）</label><input id="addInviter" placeholder="你的名字/昵称" autocomplete="off"></div>
@@ -387,7 +406,7 @@
             修改面板有三个标签页：<br>
             修改列表：可以搜索并逐条修改站子信息，也支持批量修改。把站子标记为失效时，工具会提醒你注意次数，因为被纠错太多次会扣维护名额哦。<br>
             信息维护：这里会列出所有完整度低于 50% 且已过 72 小时保护期的站子。你可以帮它们补全信息，补全后这个站子的链接就会替换成你自己的。同一个站子 30 天内只能被维护一次，防止频繁抢夺。<br>
-            失效站子池：所有被标记为失效的站子都会出现在这里。如果你发现某个站子其实还能用，可以点击我要纠错。纠错成功 3 次就能获得 1 个额外维护名额。反过来，如果你标记失效的站子被纠错超过 3 次，会失去 1 个名额（最低扣到 -10，扣到 -10 说明标记错了 60 次，基本确认是捣乱分子啦，可能会被封号哦）。<br><br>
+            失效站子池：所有被标记为失效的站子都会出现在这里。如果你发现某个站子其实还能用，可以点击"我要纠错"按钮。纠错成功 3 次就能获得 1 个额外维护名额。反过来，如果你标记失效的站子被纠错超过 3 次，会失去 1 个名额（最低扣到 -10，扣到 -10 说明标记错了 60 次，基本确认是捣乱分子啦，可能会被封号哦）。<br><br>
 
             我的面板<br>
             这里是你的个人中心。登录后可以看到统计卡片（创建的站子数、维护的站子数、收藏数、成功纠错次数）、维护名额（当前已用和总额度）、签名和评论。<br>
@@ -586,16 +605,402 @@
     // ==================== TTS 语音 ====================
     let ttsSynth = window.speechSynthesis;
     let isPlaying = false;
+    let ttsAudio = null;
+    function startTTSVisual() { isPlaying = true; const d = document.getElementById('recordDisc'); if (d) d.classList.add('playing'); }
+    function stopTTS() {
+        isPlaying = false;
+        const d = document.getElementById('recordDisc'); if (d) d.classList.remove('playing');
+        if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
+        try { ttsSynth.cancel(); } catch (e) {}
+    }
+    // 优先调用服务端硅基流动 TTS（密钥在服务器配置），失败回退浏览器内置朗读
+    async function serverTTS(text) {
+        const resp = await fetch('/momo/api/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, voice: 'fishaudio/fish-speech-1.5:auto' })
+        });
+        if (!resp.ok) throw new Error('tts http ' + resp.status);
+        const blob = await resp.blob();
+        if (!blob || blob.size === 0) throw new Error('empty audio');
+        const url = URL.createObjectURL(blob);
+        ttsAudio = new Audio(url);
+        ttsAudio.onended = stopTTS;
+        ttsAudio.onerror = function () { /* 播放失败则回退浏览器 */ browserTTS(text); };
+        await ttsAudio.play();
+    }
+    function browserTTS(text) {
+        if (!ttsSynth) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'zh-CN';
+        u.onend = stopTTS;
+        u.onerror = stopTTS;
+        ttsSynth.speak(u);
+    }
     function toggleTTS() {
-        if (isPlaying) { ttsSynth.cancel(); isPlaying = false; document.getElementById('recordDisc').classList.remove('playing'); return; }
-        const text = document.getElementById('ttsContentDisplay').textContent;
+        if (isPlaying) { stopTTS(); return; }
+        const text = (document.getElementById('ttsContentDisplay').textContent || '').trim();
         if (!text) return;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-CN';
-        utterance.onstart = () => { isPlaying = true; document.getElementById('recordDisc').classList.add('playing'); };
-        utterance.onend = () => { isPlaying = false; document.getElementById('recordDisc').classList.remove('playing'); };
-        utterance.onerror = () => { isPlaying = false; document.getElementById('recordDisc').classList.remove('playing'); };
-        ttsSynth.speak(utterance);
+        startTTSVisual();
+        serverTTS(text).catch(function () { browserTTS(text); });
+    }
+
+    // ==================== 交互动效 ====================
+    // 轻触发音（Web Audio，首次交互后懒初始化）
+    let _audioCtx = null;
+    function playClick() {
+        try {
+            if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (_audioCtx.state === 'suspended') _audioCtx.resume();
+            const t = _audioCtx.currentTime;
+            const osc = _audioCtx.createOscillator();
+            const gain = _audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(660, t);
+            osc.frequency.exponentialRampToValueAtTime(330, t + 0.06);
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(0.12, t + 0.008);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+            osc.connect(gain); gain.connect(_audioCtx.destination);
+            osc.start(t); osc.stop(t + 0.1);
+        } catch (e) {}
+    }
+    // 九宫格按钮：果冻敲击 + 轻音
+    function onAppClick(panelId, ev) {
+        playClick();
+        const icon = ev.currentTarget.querySelector('.app-icon');
+        if (icon) {
+            icon.classList.remove('jelly');
+            void icon.offsetWidth; // 重启动画
+            icon.classList.add('jelly');
+            setTimeout(() => icon.classList.remove('jelly'), 600);
+        }
+        openTool(panelId);
+    }
+    // 背景图点击 duang
+    function bannerDuang(ev) {
+        playClick();
+        if (ev.target.closest('.absolute-avatar, .absolute-record, .tts-wrapper')) return;
+        const b = document.getElementById('bannerContainer');
+        if (!b) return;
+        b.classList.remove('banner-duang');
+        void b.offsetWidth;
+        b.classList.add('banner-duang');
+        setTimeout(() => b.classList.remove('banner-duang'), 550);
+    }
+    // 显示模式自适应：按屏幕宽度自动切换手机/电脑布局（手动下拉可覆盖）
+    let _userManualMode = false;
+    function applyResponsiveMode() {
+        if (_userManualMode) return;
+        const mode = window.innerWidth < 768 ? 'mode-card' : 'mode-pc';
+        const sel = document.getElementById('viewModeSelect');
+        if (sel && sel.value !== mode) sel.value = mode;
+        if (typeof changeViewMode === 'function') changeViewMode();
+    }
+
+    // ==================== 绿色流星拖尾特效（基于 Canvas 2D 粒子系统） ====================
+    let _trailCanvas = null, _trailCtx = null, _trailRAF = null;
+    let _meteors = [], _bgStars = [];
+    let _lastT = 0, _lastTrailPoint = null;
+    let _trailEnabled = false;
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const MAX_TRAIL = 36;
+    const MAX_METEORS = 160;
+    const SLOW_FACTOR = 0.6; // 帧速放慢：数值越小越慢
+
+    function initTrail() {
+        if (_trailCanvas) return;
+        const c = document.createElement('canvas');
+        c.id = 'dragTrail';
+        // zIndex 0（不是 -1，避免被 body 白色背景遮挡），pointer-events:none 不拦截交互
+        Object.assign(c.style, { position: 'fixed', left: '0', top: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '999' });
+        document.body.insertBefore(c, document.body.firstChild);
+        _trailCanvas = c; _trailCtx = c.getContext('2d');
+        const resize = function () {
+            var W = window.innerWidth, H = window.innerHeight;
+            c.width = W * DPR; c.height = H * DPR;
+            c.style.width = W + 'px'; c.style.height = H + 'px';
+            _trailCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            buildBgStars(W, H);
+        };
+        resize(); window.addEventListener('resize', resize);
+    }
+
+    function buildBgStars(W, H) {
+        _bgStars = [];
+        var n = Math.min(120, Math.floor(W * H / 14000));
+        for (var i = 0; i < n; i++) {
+            _bgStars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.4 + 0.4, tw: Math.random() * Math.PI * 2, sp: Math.random() * 0.8 + 0.3 });
+        }
+    }
+
+    let _lastSpawnPoint = null;
+
+    function trailStart() { initTrail(); _trailEnabled = true; _lastSpawnPoint = null; if (!_trailRAF) { _lastT = performance.now(); _trailRAF = requestAnimationFrame(_trailLoop); } }
+    function trailStop() { _trailEnabled = false; _lastTrailPoint = null; _lastSpawnPoint = null; }
+    function trailPoint(x, y) {
+        _lastTrailPoint = { x: x, y: y };
+    }
+
+    function spawnMeteor(px, py, cx, cy) {
+        var dx = cx - px, dy = cy - py;
+        var len = Math.sqrt(dx * dx + dy * dy) || 1;
+        var ox = (dx / len) * 8, oy = (dy / len) * 8;
+        var m = new Meteor(cx - ox, cy - oy, dx, dy);
+        _meteors.push(m);
+        if (_meteors.length > MAX_METEORS) _meteors.shift();
+    }
+
+    function Meteor(x, y, vx, vy) {
+        this.x = x; this.y = y;
+        this.vx = vx * 0.18; this.vy = vy * 0.18;
+        this.trail = [{ x: x, y: y }];
+        this.headAlpha = 1; this.tailAlpha = 0.85; this.life = 1;
+        this.size = 6 + Math.random() * 5;
+        this.sparks = [];
+        var sparkN = 3 + Math.floor(Math.random() * 4);
+        for (var i = 0; i < sparkN; i++) {
+            var a = Math.random() * Math.PI * 2, sp = 0.5 + Math.random() * 1.6;
+            this.sparks.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 0.4, phase: Math.random() * Math.PI * 2, life: 0.8, size: 1 + Math.random() * 1.6 });
+        }
+        var r = Math.random();
+        if (r < 0.72) { this.hue = { head: '255,255,255', tail: '220,251,202', glow: '180,220,160' }; }
+        else if (r < 0.88) { this.hue = { head: '255,255,255', tail: '200,235,215', glow: '160,210,190' }; }
+        else { this.hue = { head: '255,255,255', tail: '230,245,185', glow: '200,225,150' }; }
+    }
+
+    Meteor.prototype.update = function (dt) {
+        this.life -= dt * SLOW_FACTOR;
+        this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
+        this.vx *= 0.96; this.vy *= 0.96;
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > MAX_TRAIL) this.trail.shift();
+        this.headAlpha = Math.max(0, this.life);
+        this.tailAlpha = Math.max(0, this.life * 0.85);
+        for (var i = this.sparks.length - 1; i >= 0; i--) {
+            var s = this.sparks[i];
+            s.life -= dt * SLOW_FACTOR;
+            s.x += s.vx * dt * 60; s.y += s.vy * dt * 60;
+            s.vx *= 0.94; s.vy *= 0.94;
+            if (s.life <= 0) this.sparks.splice(i, 1);
+        }
+        return this.life > 0;
+    };
+
+    Meteor.prototype.drawStar = function (cx, cy, outerR, rot) {
+        var innerR = outerR * 0.42;
+        for (var i = 0; i < 5; i++) {
+            var aOut = rot + (i * Math.PI * 2) / 5 - Math.PI / 2;
+            var aIn = rot + ((i + 0.5) * Math.PI * 2) / 5 - Math.PI / 2;
+            var xo = cx + Math.cos(aOut) * outerR, yo = cy + Math.sin(aOut) * outerR;
+            var xi = cx + Math.cos(aIn) * innerR, yi = cy + Math.sin(aIn) * innerR;
+            if (i === 0) _trailCtx.moveTo(xo, yo); else _trailCtx.lineTo(xo, yo);
+            _trailCtx.lineTo(xi, yi);
+        }
+    };
+
+    Meteor.prototype.draw = function (time) {
+        var t = this.trail, n = t.length;
+        if (n < 2) return;
+        var ctx = _trailCtx;
+        var gradStart = t[Math.max(0, n - 12)], gradEnd = t[0];
+        var grad = ctx.createLinearGradient(gradEnd.x, gradEnd.y, gradStart.x, gradStart.y);
+        grad.addColorStop(0, 'rgba(' + this.hue.tail + ',' + (this.tailAlpha * 0.15) + ')');
+        grad.addColorStop(0.5, 'rgba(' + this.hue.tail + ',' + (this.tailAlpha * 0.45) + ')');
+        grad.addColorStop(1, 'rgba(255,255,255,' + (this.headAlpha * 0.9) + ')');
+
+        ctx.save();
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+        // 第一层：较宽的发光拖尾
+        ctx.beginPath(); ctx.moveTo(t[0].x, t[0].y);
+        for (var i = 1; i < n; i++) { var mx = (t[i - 1].x + t[i].x) / 2, my = (t[i - 1].y + t[i].y) / 2; ctx.quadraticCurveTo(t[i - 1].x, t[i - 1].y, mx, my); }
+        ctx.lineTo(t[n - 1].x, t[n - 1].y);
+        ctx.strokeStyle = grad; ctx.lineWidth = 4 + Math.min(10, this.size * 1.1);
+        ctx.shadowColor = 'rgba(' + this.hue.glow + ',0.9)'; ctx.shadowBlur = 16; ctx.stroke();
+
+        // 第二层：细而亮的白色核心
+        ctx.beginPath(); ctx.moveTo(t[0].x, t[0].y);
+        for (var j = 1; j < n; j++) { var mx2 = (t[j - 1].x + t[j].x) / 2, my2 = (t[j - 1].y + t[j].y) / 2; ctx.quadraticCurveTo(t[j - 1].x, t[j - 1].y, mx2, my2); }
+        ctx.lineTo(t[n - 1].x, t[n - 1].y);
+        ctx.strokeStyle = 'rgba(255,255,255,' + (this.headAlpha * 0.85) + ')'; ctx.lineWidth = 1.6; ctx.shadowBlur = 8; ctx.stroke();
+        ctx.restore();
+
+        // 头部：白芯 + 光晕 + 五角星
+        var hx = t[n - 1].x, hy = t[n - 1].y, glowR = this.size * 3.2;
+        var glowGrad = ctx.createRadialGradient(hx, hy, 0, hx, hy, glowR);
+        glowGrad.addColorStop(0, 'rgba(' + this.hue.glow + ',' + (this.headAlpha * 0.85) + ')');
+        glowGrad.addColorStop(0.45, 'rgba(' + this.hue.glow + ',' + (this.headAlpha * 0.28) + ')');
+        glowGrad.addColorStop(1, 'rgba(' + this.hue.glow + ',0)');
+        ctx.save(); ctx.fillStyle = glowGrad; ctx.beginPath(); ctx.arc(hx, hy, glowR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,' + this.headAlpha + ')'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.arc(hx, hy, this.size * 0.55, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,' + (this.headAlpha * 0.9) + ')';
+        ctx.beginPath(); this.drawStar(hx, hy, this.size * 0.95, time * 0.001); ctx.fill();
+
+        // 周围散射光点
+        for (var k = 0; k < this.sparks.length; k++) {
+            var sp = this.sparks[k], sa = Math.max(0, sp.life) * this.headAlpha;
+            ctx.fillStyle = 'rgba(255,255,255,' + (sa * 0.85) + ')'; ctx.beginPath();
+            ctx.arc(sp.x, sp.y, sp.size * (0.6 + sp.life * 0.4), 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+    };
+
+    function _trailLoop(t) {
+        var dt = Math.min((t - _lastT) / 1000, 0.05); _lastT = t;
+        var ctx = _trailCtx, W = window.innerWidth, H = window.innerHeight;
+        ctx.clearRect(0, 0, W, H);
+
+        // 绘制静态背景星
+        ctx.save();
+        for (var i = 0; i < _bgStars.length; i++) {
+            var s = _bgStars[i];
+            var tw = 0.5 + 0.5 * Math.sin(t * 0.001 * s.sp + s.tw);
+            ctx.fillStyle = 'rgba(220,251,202,' + (0.12 + tw * 0.25) + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // 生成新流星（拖动中且移动距离超过阈值）
+        if (_trailEnabled && _lastTrailPoint) {
+            var lx = _lastTrailPoint.x, ly = _lastTrailPoint.y;
+            if (!_lastSpawnPoint || Math.hypot(lx - _lastSpawnPoint.x, ly - _lastSpawnPoint.y) > 6) {
+                var px = _lastSpawnPoint ? _lastSpawnPoint.x : lx;
+                var py = _lastSpawnPoint ? _lastSpawnPoint.y : ly;
+                spawnMeteor(px, py, lx, ly);
+                _lastSpawnPoint = { x: lx, y: ly };
+            }
+        }
+
+        // 更新 + 绘制流星
+        for (var k = _meteors.length - 1; k >= 0; k--) {
+            var m = _meteors[k];
+            if (!m.update(dt)) { _meteors.splice(k, 1); continue; }
+            m.draw(t);
+        }
+
+        // 拖动结束且所有流星都消失后才停止循环
+        if (!_trailEnabled && _meteors.length === 0) { _trailRAF = null; return; }
+        _trailRAF = requestAnimationFrame(_trailLoop);
+    }
+
+    function getTranslate(el) {
+        const t = getComputedStyle(el).transform;
+        if (!t || t === 'none') return { x: 0, y: 0 };
+        const m = t.match(/matrix\(([^)]+)\)/);
+        if (m) { const p = m[1].split(',').map(Number); return { x: p[4], y: p[5] }; }
+        return { x: 0, y: 0 };
+    }
+    function makeDraggable(el, opts) {
+        opts = opts || {};
+        const scale = (opts.scale !== undefined && opts.scale !== null) ? opts.scale : null;
+        const lpMs = opts.longPressMs || 500;
+        let dragging = false, moved = false, sx = 0, sy = 0, pid = null, base = { x: 0, y: 0 }, lpTimer = null, longPressed = false;
+        el.style.touchAction = 'none';
+        el.style.userSelect = 'none';
+        el.style.webkitUserSelect = 'none';
+        function setT(x, y) { el.style.transform = 'translate(' + x + 'px, ' + y + 'px)' + (scale != null ? ' scale(' + scale + ')' : ''); }
+        el.addEventListener('pointerdown', function (e) {
+            if (opts.ignoreSelector && e.target.closest(opts.ignoreSelector)) { dragging = false; return; }
+            dragging = true; moved = false; longPressed = false; sx = e.clientX; sy = e.clientY; pid = e.pointerId;
+            base = getTranslate(el);
+            el.style.transition = 'none';
+            try { el.setPointerCapture(pid); } catch (_) {}
+            e.stopPropagation();
+            if (opts.onLongPress) {
+                lpTimer = setTimeout(function () { longPressed = true; moved = true; if (opts.trail) trailStop(); opts.onLongPress(); }, lpMs);
+            }
+        });
+        el.addEventListener('pointermove', function (e) {
+            if (!dragging) return;
+            const dx = e.clientX - sx, dy = e.clientY - sy;
+            if (!moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) { moved = true; if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } if (opts.trail) trailStart(); }
+            if (moved && !longPressed) { setT(base.x + dx, base.y + dy); if (opts.trail) trailPoint(e.clientX, e.clientY); }
+        });
+        function end(e) {
+            if (!dragging) return; dragging = false;
+            if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+            try { el.releasePointerCapture(pid); } catch (_) {}
+            if (longPressed) return;
+            if (moved) {
+                // 松手：弹性回归原位
+                el.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+                setT(base.x, base.y);
+                if (opts.trail) setTimeout(trailStop, 150);
+            } else {
+                el.style.transition = 'transform 0.12s cubic-bezier(0.34,1.56,0.64,1)';
+                if (opts.onTap) opts.onTap();
+            }
+        }
+        el.addEventListener('pointerup', end);
+        el.addEventListener('pointercancel', end);
+        el.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
+
+    // 站子清单行：可拖动（浅绿流星拖尾，松手回归）；左滑=收藏 / 右滑=访问 / 轻点=复制页 / 长按=详情
+    function makeRowDraggable(el, item) {
+        let dragging = false, moved = false, sx = 0, sy = 0, pid = null, base = { x: 0, y: 0 }, lpTimer = null, longPressed = false, hint = null, trailOn = false;
+        const webUrl = item.web_url || item.url || '';
+        el.style.touchAction = 'pan-y';
+        el.style.userSelect = 'none';
+        el.style.webkitUserSelect = 'none';
+        function setT(x, y) { el.style.transform = 'translate(' + x + 'px, ' + y + 'px)'; }
+        function showHint(text, mode) {
+            if (!hint) { hint = document.createElement('div'); hint.className = 'swipe-hint'; el.appendChild(hint); }
+            hint.textContent = text;
+            hint.style.background = mode === 'fav' ? 'rgba(255,170,60,0.95)' : mode === 'visit' ? 'rgba(125,196,120,0.97)' : 'transparent';
+            hint.style.opacity = text ? '1' : '0';
+        }
+        function clearHint() { if (hint) { hint.remove(); hint = null; } }
+        el.addEventListener('pointerdown', function (e) {
+            if (e.target.closest('button, input, a, .url-row')) return;
+            dragging = true; moved = false; longPressed = false; sx = e.clientX; sy = e.clientY; pid = e.pointerId;
+            base = getTranslate(el);
+            el.style.transition = 'none';
+            lpTimer = setTimeout(function () { longPressed = true; moved = true; if (trailOn) trailStop(); openDetailView(item.id); }, 480);
+        });
+        el.addEventListener('pointermove', function (e) {
+            if (!dragging) return;
+            const dx = e.clientX - sx, dy = e.clientY - sy;
+            if (!moved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+                // 纵向意图 -> 交给页面滚动，不抢手势
+                if (Math.abs(dy) > Math.abs(dx)) { dragging = false; if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } return; }
+                moved = true;
+                if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+                try { el.setPointerCapture(pid); } catch (_) {}
+                trailStart(); trailOn = true; if (e.cancelable) e.preventDefault();
+            }
+            if (moved && !longPressed) {
+                setT(base.x + dx, base.y + dy);
+                trailPoint(e.clientX, e.clientY);
+                if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.3) showHint(dx < 0 ? '★ 收藏' : '↗ 访问', dx < 0 ? 'fav' : 'visit');
+                else showHint('', '');
+            }
+        });
+        function end(e) {
+            if (!dragging) return; dragging = false;
+            if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+            try { el.releasePointerCapture(pid); } catch (_) {}
+            if (longPressed) return;
+            const dx = e.clientX - sx, dy = e.clientY - sy;
+            el.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+            if (!moved) {
+                clearHint(); setT(0, 0);
+                if (webUrl) { copyTextByValue(webUrl); showToast('已复制页面链接'); }
+                return;
+            }
+            if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+                clearHint(); setT(0, 0);
+                if (dx < 0) { const wasFav = favorites.includes(item.id); toggleFavorite(item.id); showToast(wasFav ? '已取消收藏' : '已收藏'); }
+                else { if (webUrl) window.open(webUrl, '_blank'); showToast('正在访问…'); }
+                return;
+            }
+            clearHint(); setT(0, 0);
+            if (trailOn) setTimeout(trailStop, 150);
+        }
+        el.addEventListener('pointerup', end);
+        el.addEventListener('pointercancel', end);
+        el.addEventListener('click', function (e) { e.stopPropagation(); });
     }
 
     // ==================== 显示模式 ====================
@@ -624,36 +1029,36 @@
             mainBox.style.width = '616px'; mainBox.style.height = '1005px'; mainBox.style.flexDirection = 'column'; mainBox.style.gap = '15px'; mainBox.style.alignItems = 'center';
             previewArea.style.width = '560px'; previewArea.style.height = '981px';
             banner.style.width = '517px'; banner.style.marginTop = '39px'; banner.style.height = '279px'; banner.style.marginBottom = '15px'; banner.style.backgroundPosition = '0px -64px';
-            appSection.style.marginTop = '100px'; appSection.style.minHeight = '100px'; appSection.style.marginBottom = '-50px';
+            appSection.style.marginTop = '100px'; appSection.style.minHeight = '100px'; appSection.style.marginBottom = '20px';
             appGrid.style.transform = 'scale(1)'; appGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
             document.querySelectorAll('.app-icon').forEach(el => { el.style.width = '70px'; el.style.height = '70px'; });
-            footerArea.style.marginTop = '-50px'; footerArea.style.transform = '';
+            footerArea.style.marginTop = '15px'; footerArea.style.transform = '';
             footerContent.style.fontSize = '4px';
-            avatarEl.style.width = '106px'; avatarEl.style.height = '106px'; avatarEl.style.transform = 'translate(392px, 210px)';
+            avatarEl.style.width = '106px'; avatarEl.style.height = '106px'; avatarEl.style.transform = 'translate(392px, 210px) scale(1.05)';
             avatarFrameEl.style.width = '161px'; avatarFrameEl.style.height = '161px'; avatarFrameEl.style.transform = 'translate(367px, 169px)';
             nameBgBoxEl.style.width = '191px'; nameBgBoxEl.style.height = '40px'; nameBgBoxEl.style.transform = 'translate(359px, 328px)';
-            nameEl.style.fontSize = '20px'; nameEl.style.transform = 'translate(395px, 328px)';
-            recordEl.style.width = '157px'; recordEl.style.height = '157px'; recordEl.style.transform = 'translate(21px, 15px)';
+            nameEl.style.fontSize = '18px'; nameEl.style.transform = 'translate(395px, 328px)';
+            recordEl.style.width = '173px'; recordEl.style.height = '173px'; recordEl.style.transform = 'translate(12px, 15px)';
             recordCenter.style.width = '66%'; recordCenter.style.height = '66%';
             ttsBgBox.style.width = '307px'; ttsBgBox.style.height = '52px'; ttsBgBox.style.transform = 'translate(7px, 184px)';
-            ttsBoxEl.style.fontSize = '27px'; ttsBoxEl.style.transform = 'translate(7px, 184px)';
+            ttsBoxEl.style.fontSize = '24px'; ttsBoxEl.style.transform = 'translate(7px, 184px)';
         } else {
             mainBox.style.width = '1208px'; mainBox.style.height = '520px'; mainBox.style.flexDirection = 'row'; mainBox.style.gap = '30px'; mainBox.style.alignItems = 'stretch';
             previewArea.style.width = '1169px'; previewArea.style.height = '476px';
             banner.style.width = '1134px'; banner.style.marginTop = '0px'; banner.style.height = '200px'; banner.style.marginBottom = '15px'; banner.style.backgroundPosition = '0px -278px';
-            appSection.style.marginTop = '56px'; appSection.style.minHeight = '106px'; appSection.style.marginBottom = '-68px';
+            appSection.style.marginTop = '56px'; appSection.style.minHeight = '106px'; appSection.style.marginBottom = '20px';
             appGrid.style.transform = 'scale(0.95)'; appGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
             document.querySelectorAll('.app-icon').forEach(el => { el.style.width = '60px'; el.style.height = '60px'; });
-            footerArea.style.marginTop = '-200px'; footerArea.style.transform = 'translateY(146px)';
+            footerArea.style.marginTop = '15px'; footerArea.style.transform = '';
             footerContent.style.fontSize = '10px';
-            avatarEl.style.width = '197px'; avatarEl.style.height = '197px'; avatarEl.style.transform = 'translate(903px, 78px)';
+            avatarEl.style.width = '197px'; avatarEl.style.height = '197px'; avatarEl.style.transform = 'translate(903px, 78px) scale(1.05)';
             avatarFrameEl.style.width = '161px'; avatarFrameEl.style.height = '161px'; avatarFrameEl.style.transform = 'translate(186px, 191px)';
             nameBgBoxEl.style.width = '191px'; nameBgBoxEl.style.height = '40px'; nameBgBoxEl.style.transform = 'translate(671px, 205px)';
-            nameEl.style.fontSize = '27px'; nameEl.style.transform = 'translate(671px, 205px)';
-            recordEl.style.width = '213px'; recordEl.style.height = '213px'; recordEl.style.transform = 'translate(9px, 31px)';
+            nameEl.style.fontSize = '24px'; nameEl.style.transform = 'translate(671px, 205px)';
+            recordEl.style.width = '234px'; recordEl.style.height = '234px'; recordEl.style.transform = 'translate(2px, 31px)';
             recordCenter.style.width = '77%'; recordCenter.style.height = '77%';
             ttsBgBox.style.width = '307px'; ttsBgBox.style.height = '52px'; ttsBgBox.style.transform = 'translate(0px, 246px)';
-            ttsBoxEl.style.fontSize = '27px'; ttsBoxEl.style.transform = 'translate(0px, 240px)';
+            ttsBoxEl.style.fontSize = '24px'; ttsBoxEl.style.transform = 'translate(0px, 240px)';
         }
     }
 
@@ -661,11 +1066,12 @@
     function openTool(panelId) {
         document.getElementById('previewArea').style.display = 'none';
         document.getElementById(panelId).classList.add('active');
+        window.scrollTo(0, 0);
         if (panelId === 'panelTable') { initFilterSelects(); tablePage = 0; renderTableData(); }
         if (panelId === 'panelForum') { showForumList(); }
         if (panelId === 'panelActivity') { showActivityList(); initActivitySiteOptions(); }
         if (panelId === 'panelKey') { showKeyList(); initKeySiteOptions(); }
-        if (panelId === 'panelAdd') { buildAddFormCheckboxes(); loadNickname(); }
+        if (panelId === 'panelAdd') { buildAddFormCheckboxes(); loadNickname(); setTimeout(function(){ if (document.activeElement && document.activeElement.tagName === 'SELECT') document.activeElement.blur(); }, 50); }
         if (panelId === 'panelMy') loadMyPage();
         if (panelId === 'panelDoc') { renderDocList(); }
         if (panelId === 'panelModify') { modifyPage = 0; selectedModifyIds.clear(); renderModifyList(); document.getElementById('modifyListView').style.display = 'block'; document.getElementById('modifyEditView').style.display = 'none'; document.getElementById('maintenanceContainer').style.display = 'none'; }
@@ -822,6 +1228,17 @@ function toggleMultiFilter() {
     area.style.display = area.style.display === 'none' || area.style.display === '' ? 'block' : 'none';
 }
 
+function resetTableFilter() {
+    const si = document.getElementById('searchInput'); if (si) si.value = '';
+    document.querySelectorAll('#filterVendorCheckboxes input').forEach(cb => cb.checked = false);
+    const allCb = document.getElementById('filterVendorSelectAll'); if (allCb) allCb.checked = false;
+    ['filterSpeed','filterPublic','filterCheckin','filterMagic','filterStars','filterStatus','filterOfficial','filterFee','filterRegStatus','filterInviter'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    const so = document.getElementById('sortOrder'); if (so) so.value = 'star';
+    renderTableData();
+}
+
 function toggleFavorite(id) {
     if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
     else favorites.push(id);
@@ -888,16 +1305,16 @@ async function renderTableData(resetPage = true) {
     if (!data || data.length === 0) {
         container.innerHTML = `<div style="text-align:center; color:#7a9678; padding:30px;">没有找到匹配的站子</div>`;
     } else {
-        container.innerHTML = data.map(item => {
+        const _seenIds = new Set(); const _dedupedData = data.filter(d => { if (_seenIds.has(d.id)) return false; _seenIds.add(d.id); return true; }); const items = _dedupedData.map(item => {
             const webUrl = item.web_url || item.url;
             const isFav = favorites.includes(item.id);
             const checked = selectedTableIds.has(item.id) ? 'checked' : '';
-            return `
+            const html = `
             <div class="data-item">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" class="table-check" value="${item.id}" ${checked} onchange="onTableCheckChange()" onclick="event.stopPropagation();" style="flex-shrink:0;">
                     <button class="star-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${item.id})" style="position:static;">★</button>
-                    <div style="flex:1; cursor:pointer;" onclick="openDetailView(${item.id})">
+                    <div style="flex:1; cursor:pointer;">
                         <h4 style="color:#4a6f48; margin-bottom:2px;">${item.name} ${item.magic === '是' ? '(需特殊网络)' : ''}</h4>
                         <div style="font-size:12px; color:#7a9678;">模型：${item.models || ''} | 状态：${item.status || ''}</div>
                         <div class="url-row"><span class="url-text">${webUrl}</span><button class="btn-copy" onclick="event.stopPropagation(); copyTextByValue('${webUrl.replace(/'/g, "\\'")}')">复制</button></div>
@@ -905,21 +1322,36 @@ async function renderTableData(resetPage = true) {
                     </div>
                 </div>
             </div>`;
-        }).join('');
+            return { html: html, item: item };
+        });
+        container.innerHTML = items.map(o => o.html).join('');
+        Array.from(container.children).forEach(function (child, i) {
+            if (items[i]) makeRowDraggable(child, items[i].item);
+        });
     }
 
     renderTablePagination();
     document.getElementById('tableSelectAll').checked = false;
 }
 
+function jumpTablePage(val) {
+    const tp = Math.max(1, Math.ceil(tableTotal / PAGE_SIZE));
+    let p = parseInt(val, 10);
+    if (isNaN(p)) p = 1;
+    p = Math.min(Math.max(p, 1), tp) - 1;
+    tablePage = p;
+    renderTableData(false);
+}
 function renderTablePagination() {
-    const totalPages = Math.ceil(tableTotal / PAGE_SIZE);
+    const totalPages = Math.max(1, Math.ceil(tableTotal / PAGE_SIZE));
+    const cur = Math.min(Math.max(tablePage, 0), totalPages - 1);
+    tablePage = cur;
     document.getElementById('tablePagination').innerHTML = `
-        <button onclick="tablePage=0;renderTableData(false)" ${tablePage===0?'disabled':''}>首页</button>
-        <button onclick="tablePage--;renderTableData(false)" ${tablePage===0?'disabled':''}>上一页</button>
-        <span class="page-info">第 ${tablePage+1} 页 / 共 ${Math.max(totalPages,1)} 页（${tableTotal}条）</span>
-        <button onclick="tablePage++;renderTableData(false)" ${tablePage>=totalPages-1?'disabled':''}>下一页</button>
-        <button onclick="tablePage=${totalPages-1};renderTableData(false)" ${tablePage>=totalPages-1?'disabled':''}>末页</button>
+        <button onclick="tablePage=0;renderTableData(false)" ${cur===0?'disabled':''}>首页</button>
+        <button onclick="tablePage=${cur-1};renderTableData(false)" ${cur===0?'disabled':''}>上一页</button>
+        <span class="page-info">第 <input type="number" min="1" max="${totalPages}" value="${cur+1}" onchange="jumpTablePage(this.value)" style="width:54px;padding:2px 4px;border:1.5px solid #d9e8d7;border-radius:6px;font-size:13px;text-align:center;"> 页 / 共 ${totalPages} 页（${tableTotal}条）</span>
+        <button onclick="tablePage=${cur+1};renderTableData(false)" ${cur>=totalPages-1?'disabled':''}>下一页</button>
+        <button onclick="tablePage=${totalPages-1};renderTableData(false)" ${cur>=totalPages-1?'disabled':''}>末页</button>
     `;
 }
 
@@ -1166,8 +1598,7 @@ async function submitNewData() {
     const completeness = calcCompleteness(newItem);
 
     if (completeness < 0.5) {
-        const confirmed = confirm('⚠️ 信息完整度不足50%\n\n后续会开启信息维护功能# (后续通知略)');
-        if (!confirmed) return;
+        showToast('信息完整度不足50%，后续可能被其他人补全');
     } else {
         const userId = myProfile ? myProfile.id : null;
         newItem.maintainer = userId;
@@ -1192,8 +1623,7 @@ async function submitNewData() {
     document.getElementById('addModelCheckbox').innerHTML = '<div style="color:#7a9678; padding:10px;">请先选择厂商</div>';
     document.getElementById('addCustomVendorArea').style.display = 'none';
     document.getElementById('addCustomModelArea').style.display = 'none';
-    showToast('录入成功！');
-    if (confirm('是否跳转到查找站子查看？')) { closeTool('panelAdd'); openTool('panelTable'); }
+    showToast('录入成功！可在查找站子中查看~');
 }
 // ==================== 修改面板（三标签切换） ====================
 function switchModifyTab(tab) {
@@ -1253,14 +1683,24 @@ async function renderModifyList(resetPage = true) {
     document.getElementById('modifySelectAll').checked = false;
 }
 
+function jumpModifyPage(val) {
+    const tp = Math.max(1, Math.ceil(modifyTotal / PAGE_SIZE));
+    let p = parseInt(val, 10);
+    if (isNaN(p)) p = 1;
+    p = Math.min(Math.max(p, 1), tp) - 1;
+    modifyPage = p;
+    renderModifyList(false);
+}
 function renderModifyPagination() {
-    const totalPages = Math.ceil(modifyTotal / PAGE_SIZE);
+    const totalPages = Math.max(1, Math.ceil(modifyTotal / PAGE_SIZE));
+    const cur = Math.min(Math.max(modifyPage, 0), totalPages - 1);
+    modifyPage = cur;
     document.getElementById('modifyPagination').innerHTML = `
-        <button onclick="modifyPage=0;renderModifyList(false)" ${modifyPage===0?'disabled':''}>首页</button>
-        <button onclick="modifyPage--;renderModifyList(false)" ${modifyPage===0?'disabled':''}>上一页</button>
-        <span class="page-info">第 ${modifyPage+1} 页 / 共 ${Math.max(totalPages,1)} 页（${modifyTotal}条）</span>
-        <button onclick="modifyPage++;renderModifyList(false)" ${modifyPage>=totalPages-1?'disabled':''}>下一页</button>
-        <button onclick="modifyPage=${totalPages-1};renderModifyList(false)" ${modifyPage>=totalPages-1?'disabled':''}>末页</button>
+        <button onclick="modifyPage=0;renderModifyList(false)" ${cur===0?'disabled':''}>首页</button>
+        <button onclick="modifyPage=${cur-1};renderModifyList(false)" ${cur===0?'disabled':''}>上一页</button>
+        <span class="page-info">第 <input type="number" min="1" max="${totalPages}" value="${cur+1}" onchange="jumpModifyPage(this.value)" style="width:54px;padding:2px 4px;border:1.5px solid #d9e8d7;border-radius:6px;font-size:13px;text-align:center;"> 页 / 共 ${totalPages} 页（${modifyTotal}条）</span>
+        <button onclick="modifyPage=${cur+1};renderModifyList(false)" ${cur>=totalPages-1?'disabled':''}>下一页</button>
+        <button onclick="modifyPage=${totalPages-1};renderModifyList(false)" ${cur>=totalPages-1?'disabled':''}>末页</button>
     `;
 }
 
@@ -1441,6 +1881,7 @@ async function saveModify(id) {
     // 如果状态改为失效，记录标记人
     const newStatus = document.getElementById('modStatus').value;
     if (newStatus === '失效' && item.status !== '失效') {
+        if (!item.name && !item.web_url && !item.vendors) { showToast('该站子关键信息为空白，请先补充信息再标记失效'); return; }
         const nick = getNickname();
         if (nick) {
             await supa.from('update_logs').insert([{
@@ -1876,14 +2317,24 @@ async function submitMaintenance(id) {
         document.getElementById('deleteSelectAll').checked = false;
     }
 
+    function jumpDeletePage(val) {
+        const tp = Math.max(1, Math.ceil(deleteTotal / PAGE_SIZE));
+        let p = parseInt(val, 10);
+        if (isNaN(p)) p = 1;
+        p = Math.min(Math.max(p, 1), tp) - 1;
+        deletePage = p;
+        renderDeleteList(false);
+    }
     function renderDeletePagination() {
-        const totalPages = Math.ceil(deleteTotal / PAGE_SIZE);
+        const totalPages = Math.max(1, Math.ceil(deleteTotal / PAGE_SIZE));
+        const cur = Math.min(Math.max(deletePage, 0), totalPages - 1);
+        deletePage = cur;
         document.getElementById('deletePagination').innerHTML = `
-            <button onclick="deletePage=0;renderDeleteList(false)" ${deletePage===0?'disabled':''}>首页</button>
-            <button onclick="deletePage--;renderDeleteList(false)" ${deletePage===0?'disabled':''}>上一页</button>
-            <span class="page-info">第 ${deletePage+1} 页 / 共 ${Math.max(totalPages,1)} 页（${deleteTotal}条）</span>
-            <button onclick="deletePage++;renderDeleteList(false)" ${deletePage>=totalPages-1?'disabled':''}>下一页</button>
-            <button onclick="deletePage=${totalPages-1};renderDeleteList(false)" ${deletePage>=totalPages-1?'disabled':''}>末页</button>
+            <button onclick="deletePage=0;renderDeleteList(false)" ${cur===0?'disabled':''}>首页</button>
+            <button onclick="deletePage=${cur-1};renderDeleteList(false)" ${cur===0?'disabled':''}>上一页</button>
+            <span class="page-info">第 <input type="number" min="1" max="${totalPages}" value="${cur+1}" onchange="jumpDeletePage(this.value)" style="width:54px;padding:2px 4px;border:1.5px solid #d9e8d7;border-radius:6px;font-size:13px;text-align:center;"> 页 / 共 ${totalPages} 页（${deleteTotal}条）</span>
+            <button onclick="deletePage=${cur+1};renderDeleteList(false)" ${cur>=totalPages-1?'disabled':''}>下一页</button>
+            <button onclick="deletePage=${totalPages-1};renderDeleteList(false)" ${cur>=totalPages-1?'disabled':''}>末页</button>
         `;
     }
 
@@ -2025,6 +2476,11 @@ function renderMyAuthView() {
             <div style="text-align:center; margin-top:12px; font-size:13px; color:#7a9678;">
                 <span id="mySwitchPrompt">已有账号？</span> <a style="color:#4a6f48; font-weight:bold; cursor:pointer; text-decoration:underline;" onclick="myToggleAuthMode()" id="mySwitchLink">去登录</a>
             </div>
+            <div style="margin-top:15px; padding:12px; background:#f0f7ee; border:1.5px dashed #9dbba0; border-radius:12px; text-align:center;">
+                <div style="font-size:13px; color:#4a6f48; font-weight:bold; margin-bottom:6px;">一键签到拓展工具</div>
+                <div style="font-size:11px; color:#7a9678; margin-bottom:8px;">All-API-Hub v3.58.0 支持中转站自动签到</div>
+                <a href="https://github.com/qixing-jk/all-api-hub/releases/tag/v3.58.0" target="_blank" style="display:inline-block; padding:6px 16px; background:#4a6f48; color:#fff; border-radius:10px; font-size:13px; text-decoration:none; font-weight:bold;">前往下载</a>
+            </div>
         </div>
     `;
 }
@@ -2114,6 +2570,7 @@ function myToggleAuthMode() {
 }
 
 async function myRegister() {
+  try {
     const nickname = document.getElementById('myRegNickname').value.trim();
     const password = document.getElementById('myRegPassword').value;
     const password2 = document.getElementById('myRegPassword2').value;
@@ -2144,9 +2601,13 @@ async function myRegister() {
     renderMyProfileView();
     await myLoadProfileData();
     showToast('注册成功！请牢记你的ID号：' + uid + '，以后用它和密码登录哦~');
+  } catch(e) {
+    showToast('注册出错：' + (e.message || '可能是浏览器不支持加密API，请尝试用HTTPS访问，或刷新后重试'));
+  }
 }
 
 async function myLogin() {
+  try {
     const idStr = document.getElementById('myLoginId').value.trim();
     const password = document.getElementById('myLoginPassword').value;
 
@@ -2174,6 +2635,9 @@ async function myLogin() {
     renderMyProfileView();
     await myLoadProfileData();
     showToast('登录成功，欢迎回来，' + myProfile.nickname + '~');
+  } catch(e) {
+    showToast('登录出错：' + (e.message || '可能是浏览器不支持加密API，请尝试用HTTPS访问，或刷新后重试'));
+  }
 }
 
 async function myLogout() {
@@ -2709,7 +3173,10 @@ async function showMyPosts() {
         if (!pw) { showToast('请输入删除密码！'); return; }
         const { data: key } = await supa.from('keys').select('*').eq('id', id).single();
         if (!key) { showToast('记录不存在'); return; }
-        if (String(key.password || '') !== pw) { showToast('密码错误！'); return; }
+        if (String(key.password || '') !== pw) {
+        if (!key.password && !pw) { /* 空密码密钥允许直接删除 */ }
+        else { showToast('密码错误！'); return; }
+    }
         const { error } = await supa.from('keys').delete().eq('id', id);
         if (error) { showToast('删除失败：' + error.message); return; }
         showToast('已删除'); showKeyList();
@@ -2796,7 +3263,32 @@ async function showMyPosts() {
     function toggleDocCopyright() { const content = document.getElementById('docCopyrightContent'); content.style.display = content.style.display === 'none' ? 'block' : 'none'; }
 
     // ==================== 初始化 ====================
-    window.addEventListener('DOMContentLoaded', function() { changeViewMode(); });
+    window.addEventListener('DOMContentLoaded', function() {
+        applyResponsiveMode();
+        window.addEventListener('resize', applyResponsiveMode);
+        // 九宫格 9 个功能键：可拖动（带浅绿流星拖尾），轻点进入桌面
+        document.querySelectorAll('.app-block').forEach(function (b) {
+            const pid = b.getAttribute('data-panel');
+            makeDraggable(b, { trail: true, onTap: function () {
+                playClick();
+                const ic = b.querySelector('.app-icon');
+                if (ic) { ic.classList.remove('jelly'); void ic.offsetWidth; ic.classList.add('jelly'); setTimeout(function () { ic.classList.remove('jelly'); }, 600); }
+                if (pid) openTool(pid);
+            }});
+        });
+        // “与君初相识” 文字：可拖动，松手回归原位；轻点朗读
+        const ttsBox = document.getElementById('ttsBoxEl');
+        if (ttsBox) makeDraggable(ttsBox, { trail: true, onTap: function () { toggleTTS(); } });
+        // 头像：可拖动（带流星拖尾，松手回归）；轻点触发音；长按更换头像
+        const avatarEl = document.getElementById('avatarEl');
+        if (avatarEl) makeDraggable(avatarEl, { trail: true, scale: 1.05, onTap: function () { playClick(); }, onLongPress: function () { const up = document.getElementById('avatarUpload'); if (up) up.click(); } });
+        // 唱片机：可拖动（带流星拖尾，松手回归）；轻点播放/暂停 TTS（中心圆点用于换图，不触发拖动）
+        const recordEl = document.getElementById('recordEl');
+        if (recordEl) makeDraggable(recordEl, { trail: true, ignoreSelector: '#recordCenter', onTap: function () { playClick(); toggleTTS(); } });
+        // 复制群号按钮：可拖动，轻点复制
+        const copyGroupBtn = document.querySelector('.btn-copy-group');
+        if (copyGroupBtn) makeDraggable(copyGroupBtn, { trail: true, onTap: function () { copyGroupNumber(); } });
+    });
 </script>
 </body>
 </html>
